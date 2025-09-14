@@ -62,7 +62,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email,
       password,
       options: {
-        data: userData
+        data: userData,
+        emailRedirectTo: `${window.location.origin}/email-confirm`
       }
     })
 
@@ -75,7 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else if (data.user && !data.user.email_confirmed_at) {
       toast({
         title: "Cadastro realizado!",
-        description: "Verifique seu e-mail para confirmar a conta.",
+        description: "Verifique seu e-mail para confirmar a conta. Após a confirmação, você será redirecionado para o login.",
       })
     }
 
