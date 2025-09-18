@@ -1,38 +1,35 @@
 import { supabase } from '@/lib/supabase'
-import type { Goal } from '@/lib/supabase'
 
 export interface CreateGoalData {
-  name: string
-  target_amount: number
-  current_amount?: number
-  deadline?: string
+  nome: string
+  valor: number
+  valor_atual?: number
+  prazo?: string
 }
 
 export interface UpdateGoalData {
-  name?: string
-  target_amount?: number
-  current_amount?: number
-  deadline?: string
+  nome?: string
+  valor?: number
+  valor_atual?: number
+  prazo?: string
+}
+
+export interface Goal {
+  id: number
+  user_id: string
+  email: string
+  telefone?: string
+  nome: string
+  valor: number
+  valor_atual: number
+  prazo: string | null
+  created_at: string
+  updated_at: string
 }
 
 class GoalService {
-  // Get all goals for the current user
+  // Get all goals for the current user from metas table
   async getGoals(): Promise<Goal[]> {
-    const { data, error } = await supabase
-      .from('goals')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching goals:', error)
-      throw new Error('Failed to fetch goals')
-    }
-
-    return data || []
-  }
-
-  // Create a new goal
-  async createGoal(goal: CreateGoalData): Promise<Goal> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -40,29 +37,97 @@ class GoalService {
     }
 
     const { data, error } = await supabase
-      .from('goals')
-      .insert({
-        ...goal,
-        user_id: user.id,
-        current_amount: goal.current_amount || 0
-      })
+      .from('metas')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching goals:', error)
+      throw new Error(`Failed to fetch goals: ${error.message}`)
+    }
+
+    return data || []
+  }
+
+  // Create a new goal in metas table
+  async createGoal(goal: CreateGoalData): Promise<Goal> {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    // Buscar dados do usuário na tabela users
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('first_name, last_name, phone')
+      .eq('id', user.id)
+      .single()
+
+    let userPhone = ''
+
+    if (userError) {
+      console.error('Error fetching user data:', userError)
+      // Se não conseguir buscar da tabela users, usar dados do auth
+      userPhone = user.user_metadata?.phone || user.user_metadata?.telefone || ''
+    } else {
+      // Usar dados da tabela users
+      userPhone = userData.phone || ''
+    }
+
+    const goalData = {
+      user_id: user.id,
+      email: user.email,
+      telefone: userPhone,
+      nome: goal.nome,
+      valor: goal.valor,
+      valor_atual: goal.valor_atual || 0,
+      prazo: goal.prazo || null
+    }
+
+    const { data, error } = await supabase
+      .from('metas')
+      .insert(goalData)
       .select()
       .single()
 
     if (error) {
       console.error('Error creating goal:', error)
-      throw new Error('Failed to create goal')
+      console.error('Goal data that failed:', goalData)
+      throw new Error(`Failed to create goal: ${error.message}`)
     }
 
     return data
   }
 
   // Update a goal
-  async updateGoal(id: string, updates: UpdateGoalData): Promise<Goal> {
+  async updateGoal(id: number, updates: UpdateGoalData): Promise<Goal> {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const updateData: any = {
+      nome: updates.nome,
+      valor: updates.valor,
+      valor_atual: updates.valor_atual,
+      prazo: updates.prazo
+    }
+
+    // Remove undefined values
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === undefined) {
+        delete updateData[key]
+      }
+    })
+
     const { data, error } = await supabase
-      .from('goals')
-      .update(updates)
+      .from('metas')
+      .update(updateData)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single()
 
@@ -75,11 +140,18 @@ class GoalService {
   }
 
   // Delete a goal
-  async deleteGoal(id: string): Promise<void> {
+  async deleteGoal(id: number): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
     const { error } = await supabase
-      .from('goals')
+      .from('metas')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) {
       console.error('Error deleting goal:', error)
@@ -88,12 +160,19 @@ class GoalService {
   }
 
   // Add amount to goal
-  async addAmountToGoal(id: string, amount: number): Promise<Goal> {
+  async addAmountToGoal(id: number, amount: number): Promise<Goal> {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
     // First get the current goal
     const { data: goal, error: fetchError } = await supabase
-      .from('goals')
-      .select('current_amount')
+      .from('metas')
+      .select('valor_atual, valor')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (fetchError) {
@@ -101,18 +180,25 @@ class GoalService {
       throw new Error('Failed to fetch goal')
     }
 
-    const newAmount = Number(goal.current_amount) + amount
+    const newAmount = Math.min(goal.valor_atual + amount, goal.valor)
 
-    return this.updateGoal(id, { current_amount: newAmount })
+    return this.updateGoal(id, { valor_atual: newAmount })
   }
 
   // Remove amount from goal
-  async removeAmountFromGoal(id: string, amount: number): Promise<Goal> {
+  async removeAmountFromGoal(id: number, amount: number): Promise<Goal> {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
     // First get the current goal
     const { data: goal, error: fetchError } = await supabase
-      .from('goals')
-      .select('current_amount')
+      .from('metas')
+      .select('valor_atual')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single()
 
     if (fetchError) {
@@ -120,9 +206,9 @@ class GoalService {
       throw new Error('Failed to fetch goal')
     }
 
-    const newAmount = Math.max(0, Number(goal.current_amount) - amount)
+    const newAmount = Math.max(0, goal.valor_atual - amount)
 
-    return this.updateGoal(id, { current_amount: newAmount })
+    return this.updateGoal(id, { valor_atual: newAmount })
   }
 
   // Calculate goal progress percentage
@@ -162,6 +248,31 @@ class GoalService {
   // Format date for display
   formatDateForDisplay(dateString: string): string {
     return new Date(dateString).toLocaleDateString('pt-BR')
+  }
+
+  // Get goal statistics
+  async getGoalStats(): Promise<{
+    totalGoals: number
+    completedGoals: number
+    totalTargetAmount: number
+    totalCurrentAmount: number
+    averageProgress: number
+  }> {
+    const goals = await this.getGoals()
+    
+    const totalGoals = goals.length
+    const completedGoals = goals.filter(goal => this.isGoalCompleted(goal.valor_atual, goal.valor)).length
+    const totalTargetAmount = goals.reduce((sum, goal) => sum + goal.valor, 0)
+    const totalCurrentAmount = goals.reduce((sum, goal) => sum + goal.valor_atual, 0)
+    const averageProgress = totalGoals > 0 ? goals.reduce((sum, goal) => sum + this.calculateProgress(goal.valor_atual, goal.valor), 0) / totalGoals : 0
+
+    return {
+      totalGoals,
+      completedGoals,
+      totalTargetAmount,
+      totalCurrentAmount,
+      averageProgress
+    }
   }
 }
 

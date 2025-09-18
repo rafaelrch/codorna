@@ -140,13 +140,13 @@ export function ExpenseChart({ startDate, endDate }: ExpenseChartProps) {
         const transactions = await transactionService.getTransactions({
           startDate,
           endDate,
-          type: 'expense'
+          type: 'saida'
         });
 
         // Group by category and calculate totals
         const categoryTotals = transactions.reduce((acc, transaction) => {
-          const categoryName = transaction.category_output?.name || 'Outros';
-          acc[categoryName] = (acc[categoryName] || 0) + Number(transaction.amount);
+          const categoryName = transaction.categoria || 'Outros';
+          acc[categoryName] = (acc[categoryName] || 0) + Number(transaction.valor);
           return acc;
         }, {} as Record<string, number>);
 
@@ -154,12 +154,12 @@ export function ExpenseChart({ startDate, endDate }: ExpenseChartProps) {
 
         // Criar dados para todas as categorias, incluindo as com valor zero
         const allCategoriesData: ChartData[] = expenseCategories.map((category, index) => {
-          const value = categoryTotals[category.name] || 0;
+          const value = categoryTotals[category.nome] || 0;
           return {
-            name: category.name,
+            name: category.nome,
             value,
             percentage: totalAmount > 0 ? (value / totalAmount) * 100 : 0,
-            color: categoryColors[category.name] || chartColors[index % chartColors.length]
+            color: categoryColors[category.nome] || chartColors[index % chartColors.length]
           };
         });
 

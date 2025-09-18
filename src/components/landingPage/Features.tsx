@@ -5,7 +5,7 @@ const Features = () => {
   const features = [
     {
       title: "Controle de Gastos",
-      description: "Organize e categorize suas despesas para ter controle total sobre seus gastos.",
+      description: "Organize e categorize suas saídas para ter controle total sobre seus gastos.",
       icon: (
         <Layers size={24} className="text-black" />
       )

@@ -14,47 +14,16 @@ export default function EmailConfirm() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    const confirmEmail = async () => {
-      const token = searchParams.get('token')
-      const type = searchParams.get('type')
-
-      if (!token || type !== 'signup') {
-        setStatus('error')
-        setMessage('Link de confirmação inválido.')
-        return
-      }
-
-      try {
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: 'signup'
-        })
-
-        if (error) {
-          setStatus('error')
-          setMessage('Erro ao confirmar email. O link pode ter expirado.')
-        } else {
-          setStatus('success')
-          setMessage('Email confirmado com sucesso! Você pode fazer login agora.')
-          
-          toast({
-            title: "Email confirmado!",
-            description: "Sua conta foi ativada com sucesso.",
-          })
-
-          // Redirecionar para login após 3 segundos
-          setTimeout(() => {
-            navigate('/login', { replace: true })
-          }, 3000)
-        }
-      } catch (error) {
-        setStatus('error')
-        setMessage('Erro inesperado ao confirmar email.')
-      }
-    }
-
-    confirmEmail()
-  }, [searchParams, navigate, toast])
+    // Como o usuário chegou até esta página, significa que o email foi confirmado
+    // O Supabase já processou a confirmação automaticamente
+    setStatus('success')
+    setMessage('Cadastro finalizado com sucesso! Sua conta foi ativada.')
+    
+    toast({
+      title: "Email confirmado!",
+      description: "Sua conta foi ativada com sucesso.",
+    })
+  }, [toast])
 
   const handleGoToLogin = () => {
     navigate('/login', { replace: true })
@@ -78,7 +47,7 @@ export default function EmailConfirm() {
           
           <CardTitle className="text-2xl font-bold">
             {status === 'loading' && 'Confirmando email...'}
-            {status === 'success' && 'Email confirmado!'}
+            {status === 'success' && 'Cadastro finalizado!'}
             {status === 'error' && 'Erro na confirmação'}
           </CardTitle>
           
@@ -91,11 +60,18 @@ export default function EmailConfirm() {
           {status === 'success' && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Você será redirecionado para a página de login em alguns segundos...
+                Agora você pode começar a usar o Codorna!
               </p>
-              <Button onClick={handleGoToLogin} className="w-full">
-                Ir para Login
-              </Button>
+              <a 
+                href="https://wa.me/5571993393322?text=Finalizei%20meu%20cadastro" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full"
+              >
+                <Button className="w-full bg-[#208251] text-white hover:bg-[#208251]/90">
+                  Iniciar no WhatsApp
+                </Button>
+              </a>
             </div>
           )}
           

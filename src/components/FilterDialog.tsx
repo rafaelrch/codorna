@@ -27,7 +27,7 @@ export default function FilterDialog({ onApplyFilters, currentFilters }: FilterD
     minAmount: currentFilters.minAmount || '',
     maxAmount: currentFilters.maxAmount || '',
   });
-  const [categories, setCategories] = useState<Array<{ id: number; name: string; type: string }>>([]);
+  const [categories, setCategories] = useState<Array<{ id: number; nome: string; tipo: string }>>([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
 
   // Verificar se há filtros ativos
@@ -66,24 +66,24 @@ export default function FilterDialog({ onApplyFilters, currentFilters }: FilterD
         console.error('Erro ao carregar categorias:', error);
         // Fallback para categorias padrão
         setCategories([
-          { id: 1, name: 'Casa', type: 'expense' },
-          { id: 2, name: 'Mercado', type: 'expense' },
-          { id: 3, name: 'Farmácia', type: 'expense' },
-          { id: 4, name: 'Academia', type: 'expense' },
-          { id: 5, name: 'Assinaturas', type: 'expense' },
-          { id: 6, name: 'Cartão', type: 'expense' },
-          { id: 7, name: 'Transporte', type: 'expense' },
-          { id: 8, name: 'Educação', type: 'expense' },
-          { id: 9, name: 'Lazer', type: 'expense' },
-          { id: 10, name: 'Contas Fixas', type: 'expense' },
-          { id: 11, name: 'Impostos', type: 'expense' },
-          { id: 12, name: 'Compra Online', type: 'expense' },
-          { id: 13, name: 'Shopping', type: 'expense' },
-          { id: 14, name: 'Salário', type: 'income' },
-          { id: 15, name: 'Freelance', type: 'income' },
-          { id: 16, name: 'Investimentos', type: 'income' },
-          { id: 17, name: 'Família', type: 'income' },
-          { id: 18, name: 'Reembolsos', type: 'income' }
+          { id: 1, nome: 'Casa', tipo: 'saida' },
+          { id: 2, nome: 'Mercado', tipo: 'saida' },
+          { id: 3, nome: 'Farmácia', tipo: 'saida' },
+          { id: 4, nome: 'Academia', tipo: 'saida' },
+          { id: 5, nome: 'Assinaturas', tipo: 'saida' },
+          { id: 6, nome: 'Cartão', tipo: 'saida' },
+          { id: 7, nome: 'Transporte', tipo: 'saida' },
+          { id: 8, nome: 'Educação', tipo: 'saida' },
+          { id: 9, nome: 'Lazer', tipo: 'saida' },
+          { id: 10, nome: 'Contas Fixas', tipo: 'saida' },
+          { id: 11, nome: 'Impostos', tipo: 'saida' },
+          { id: 12, nome: 'Compra Online', tipo: 'saida' },
+          { id: 13, nome: 'Shopping', tipo: 'saida' },
+          { id: 14, nome: 'Salário', tipo: 'entrada' },
+          { id: 15, nome: 'Freelance', tipo: 'entrada' },
+          { id: 16, nome: 'Investimentos', tipo: 'entrada' },
+          { id: 17, nome: 'Família', tipo: 'entrada' },
+          { id: 18, nome: 'Reembolsos', tipo: 'entrada' }
         ]);
       } finally {
         setLoadingCategories(false);
@@ -161,8 +161,8 @@ export default function FilterDialog({ onApplyFilters, currentFilters }: FilterD
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="income">Entrada</SelectItem>
-                <SelectItem value="expense">Saída</SelectItem>
+                <SelectItem value="entrada">Entrada</SelectItem>
+                <SelectItem value="saida">Saída</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -181,8 +181,8 @@ export default function FilterDialog({ onApplyFilters, currentFilters }: FilterD
               <SelectContent>
                 <SelectItem value="all">Todas as categorias</SelectItem>
                 {categories.map((category) => (
-                  <SelectItem key={`category-${category.id}`} value={category.name}>
-                    {category.name}
+                  <SelectItem key={`category-${category.id}`} value={category.nome}>
+                    {category.nome}
                   </SelectItem>
                 ))}
               </SelectContent>

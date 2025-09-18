@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Target, Plus, TrendingUp } from 'lucide-react';
 import { goalService } from '@/services/goalService';
 import { useToast } from '@/hooks/use-toast';
-import type { Goal } from '@/lib/supabase';
+import type { Goal } from '@/services/goalService';
 import { useNavigate } from 'react-router-dom';
 
 export function FinancialGoals() {
@@ -20,9 +20,10 @@ export function FinancialGoals() {
       try {
         setLoading(true);
         const data = await goalService.getGoals();
+        console.log('Goals loaded:', data);
         // Filter active goals (not completed) and show only first 3 for dashboard
         const activeGoals = data.filter(goal => {
-          const progress = goalService.calculateProgress(goal.current_amount, goal.target_amount);
+          const progress = goalService.calculateProgress(goal.valor_atual, goal.valor);
           return progress < 100;
         });
         setGoals(activeGoals.slice(0, 3));
@@ -97,23 +98,23 @@ export function FinancialGoals() {
           </div>
         ) : (
           goals.map((goal) => {
-            const progress = calculateProgress(goal.current_amount, goal.target_amount);
+            const progress = calculateProgress(goal.valor_atual, goal.valor);
             const isCompleted = progress >= 100;
             
             return (
               <div key={goal.id} className="space-y-2 p-4 border rounded-lg hover:bg-muted/20 transition-colors">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <h4 className="font-medium text-card-foreground">{goal.name}</h4>
+                    <h4 className="font-medium text-card-foreground">{goal.nome}</h4>
                     <p className="text-sm text-muted-foreground">Meta financeira</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">
-                      {formatCurrency(goal.current_amount)} / {formatCurrency(goal.target_amount)}
+                      {formatCurrency(goal.valor_atual)} / {formatCurrency(goal.valor)}
                     </p>
-                    {goal.deadline && (
+                    {goal.prazo && (
                       <p className="text-xs text-muted-foreground">
-                        até {goalService.formatDateForDisplay(goal.deadline)}
+                        até {goalService.formatDateForDisplay(goal.prazo)}
                       </p>
                     )}
                   </div>

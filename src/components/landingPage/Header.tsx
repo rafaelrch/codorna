@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Logo from './Logo';
-import { Menu, X, CircleDot, LayoutDashboard } from 'lucide-react';
+import { Menu, X, CircleDot, LayoutDashboard, CreditCard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Link } from 'react-router-dom';
@@ -64,6 +64,16 @@ const Header = () => {
               >
                 <LayoutDashboard size={16} className="inline-block mr-1.5" /> Dashboard
               </ToggleGroupItem>
+              <ToggleGroupItem 
+                value="pricing" 
+                className={cn(
+                  "px-4 py-2 rounded-full transition-colors relative",
+                  activePage === 'pricing' ? 'text-accent-foreground bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                )}
+                onClick={handleNavClick('pricing')}
+              >
+                <CreditCard size={16} className="inline-block mr-1.5" /> Planos
+              </ToggleGroupItem>
             </ToggleGroup>
           </div>
         </nav>
@@ -90,15 +100,21 @@ const Header = () => {
               >
                 <LayoutDashboard size={16} className="inline-block mr-1.5" /> Dashboard
               </a>
+              <a 
+                href="#pricing" 
+                className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                  activePage === 'pricing' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+                onClick={handleNavClick('pricing')}
+              >
+                <CreditCard size={16} className="inline-block mr-1.5" /> Planos
+              </a>
               
-              {/* Mobile buttons */}
+              {/* Mobile button */}
               <div className="flex flex-col gap-2 pt-4 border-t border-gray-200">
-                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full text-muted-foreground hover:text-foreground hover:bg-muted">Log in</Button>
-                </Link>
-                <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full bg-black text-white hover:bg-gray-800">Cadastrar</Button>
-                </Link>
+                <a href="https://wa.me/5571993393322?text=Quero%20iniciar%20o%20teste%20gr%C3%A1tis" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full">Experimentar</Button>
+                </a>
               </div>
             </div>
           </div>
@@ -106,14 +122,9 @@ const Header = () => {
         
         <div className="hidden md:flex items-center gap-4">
           <div className="rounded-2xl">
-            <Link to="/login">
-              <Button variant="ghost" className="text-muted-foreground hover:text-foreground hover:bg-muted">Login</Button>
-            </Link>
-          </div>
-          <div className="rounded-2xl">
-            <Link to="/signup">
-              <Button className="bg-black text-white hover:bg-gray-900">Cadastrar</Button>
-            </Link>
+            <a href="https://wa.me/5571993393322?text=Quero%20iniciar%20o%20teste%20gr%C3%A1tis" target="_blank" rel="noopener noreferrer">
+              <Button className="bg-black bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full">Experimentar</Button>
+            </a>
           </div>
         </div>
       </header>

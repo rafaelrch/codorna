@@ -31,7 +31,7 @@ import {
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { goalService } from '@/services/goalService'
-import type { Goal } from '@/lib/supabase'
+import type { Goal } from '@/services/goalService'
 
 interface GoalCardProps {
   goal: Goal
@@ -46,16 +46,16 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [amount, setAmount] = useState('')
   const [editData, setEditData] = useState({
-    name: goal.name,
-    target_amount: goal.target_amount.toString(),
-    deadline: goal.deadline || ''
+    nome: goal.nome,
+    valor: goal.valor.toString(),
+    prazo: goal.prazo || ''
   })
   const { toast } = useToast()
 
-  const progress = goalService.calculateProgress(goal.current_amount, goal.target_amount)
-  const isCompleted = goalService.isGoalCompleted(goal.current_amount, goal.target_amount)
-  const isOverdue = goal.deadline ? goalService.isGoalOverdue(goal.deadline) : false
-  const daysRemaining = goal.deadline ? goalService.getDaysRemaining(goal.deadline) : null
+  const progress = goalService.calculateProgress(goal.valor_atual, goal.valor)
+  const isCompleted = goalService.isGoalCompleted(goal.valor_atual, goal.valor)
+  const isOverdue = goal.prazo ? goalService.isGoalOverdue(goal.prazo) : false
+  const daysRemaining = goal.prazo ? goalService.getDaysRemaining(goal.prazo) : null
 
   const handleAddAmount = async () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -114,7 +114,7 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
   }
 
   const handleEdit = async () => {
-    if (!editData.name.trim()) {
+    if (!editData.nome.trim()) {
       toast({
         title: "Erro",
         description: "Por favor, preencha o nome da meta.",
@@ -123,7 +123,7 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
       return
     }
 
-    if (!editData.target_amount || parseFloat(editData.target_amount) <= 0) {
+    if (!editData.valor || parseFloat(editData.valor) <= 0) {
       toast({
         title: "Erro",
         description: "Por favor, insira um valor de meta válido.",
@@ -134,9 +134,9 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
 
     try {
       await goalService.updateGoal(goal.id, {
-        name: editData.name.trim(),
-        target_amount: parseFloat(editData.target_amount),
-        deadline: editData.deadline || undefined,
+        nome: editData.nome.trim(),
+        valor: parseFloat(editData.valor),
+        prazo: editData.prazo || undefined,
       })
       toast({
         title: "Sucesso",
@@ -179,12 +179,12 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
             <div className="space-y-1">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                {goal.name}
+                {goal.nome}
               </CardTitle>
-              {goal.deadline && (
+              {goal.prazo && (
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  {goalService.formatDateForDisplay(goal.deadline)}
+                  {goalService.formatDateForDisplay(goal.prazo)}
                   {daysRemaining !== null && (
                     <Badge variant={isOverdue ? "destructive" : "secondary"} className="ml-2">
                       {isOverdue ? "Vencida" : `${daysRemaining} dias`}
@@ -223,8 +223,8 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
             </div>
             <Progress value={progress} className="h-2" />
             <div className="flex justify-between text-sm text-muted-foreground">
-              <span>{goalService.formatCurrency(goal.current_amount)}</span>
-              <span>{goalService.formatCurrency(goal.target_amount)}</span>
+              <span>{goalService.formatCurrency(goal.valor_atual)}</span>
+              <span>{goalService.formatCurrency(goal.valor)}</span>
             </div>
           </div>
 
@@ -325,8 +325,8 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
               <Label htmlFor="edit-name">Nome da Meta</Label>
               <Input
                 id="edit-name"
-                value={editData.name}
-                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                value={editData.nome}
+                onChange={(e) => setEditData({ ...editData, nome: e.target.value })}
               />
             </div>
             <div>
@@ -335,8 +335,8 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
                 id="edit-target"
                 type="number"
                 step="0.01"
-                value={editData.target_amount}
-                onChange={(e) => setEditData({ ...editData, target_amount: e.target.value })}
+                value={editData.valor}
+                onChange={(e) => setEditData({ ...editData, valor: e.target.value })}
               />
             </div>
             <div>
@@ -344,8 +344,8 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
               <Input
                 id="edit-deadline"
                 type="date"
-                value={editData.deadline}
-                onChange={(e) => setEditData({ ...editData, deadline: e.target.value })}
+                value={editData.prazo}
+                onChange={(e) => setEditData({ ...editData, prazo: e.target.value })}
               />
             </div>
           </div>
@@ -365,7 +365,7 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
             <DialogTitle>Excluir Meta</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Tem certeza que deseja excluir a meta "{goal.name}"? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir a meta "{goal.nome}"? Esta ação não pode ser desfeita.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteOpen(false)}>

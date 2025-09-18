@@ -8,7 +8,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Plus } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { goalService } from '@/services/goalService'
-import type { Goal } from '@/lib/supabase'
 
 interface AddGoalDialogProps {
   onAddGoal: () => void
@@ -19,15 +18,15 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
   const { toast } = useToast()
   const form = useForm({
     defaultValues: {
-      name: '',
-      target_amount: '',
-      current_amount: '',
-      deadline: '',
+      nome: '',
+      valor: '',
+      valor_atual: '',
+      prazo: '',
     }
   })
 
   const onSubmit = async (data: any) => {
-    if (!data.name.trim()) {
+    if (!data.nome.trim()) {
       toast({
         title: "Erro",
         description: "Por favor, preencha o nome da meta.",
@@ -36,7 +35,7 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
       return
     }
 
-    if (!data.target_amount || parseFloat(data.target_amount) <= 0) {
+    if (!data.valor || parseFloat(data.valor) <= 0) {
       toast({
         title: "Erro",
         description: "Por favor, insira um valor de meta válido maior que zero.",
@@ -47,12 +46,13 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
 
     try {
       const goalData = {
-        name: data.name.trim(),
-        target_amount: parseFloat(data.target_amount),
-        current_amount: data.current_amount ? parseFloat(data.current_amount) : 0,
-        deadline: data.deadline || undefined,
+        nome: data.nome.trim(),
+        valor: parseFloat(data.valor),
+        valor_atual: data.valor_atual ? parseFloat(data.valor_atual) : 0,
+        prazo: data.prazo || undefined,
       }
 
+      console.log('Creating goal with data:', goalData)
       await goalService.createGoal(goalData)
       
       toast({
@@ -61,15 +61,16 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
       })
       
       form.reset({
-        name: '',
-        target_amount: '',
-        current_amount: '',
-        deadline: '',
+        nome: '',
+        valor: '',
+        valor_atual: '',
+        prazo: '',
       })
       
       setOpen(false)
       onAddGoal()
     } catch (error: any) {
+      console.error('Error creating goal:', error)
       toast({
         title: "Erro",
         description: error.message || "Não foi possível criar a meta.",
@@ -94,7 +95,7 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
+              name="nome"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nome da Meta</FormLabel>
@@ -108,7 +109,7 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
 
             <FormField
               control={form.control}
-              name="target_amount"
+              name="valor"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Valor da Meta</FormLabel>
@@ -127,7 +128,7 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
 
             <FormField
               control={form.control}
-              name="current_amount"
+              name="valor_atual"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Valor Atual (opcional)</FormLabel>
@@ -146,7 +147,7 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
 
             <FormField
               control={form.control}
-              name="deadline"
+              name="prazo"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Data Limite (opcional)</FormLabel>

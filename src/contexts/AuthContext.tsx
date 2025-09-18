@@ -15,6 +15,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: any }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: any }>
+  updatePassword: (password: string) => Promise<{ error: any }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -37,7 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const wasLoggedOut = !user
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
@@ -132,6 +132,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
+  const updatePassword = async (password: string) => {
+    const { data, error } = await supabase.auth.updateUser({
+      password: password
+    })
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive",
+      })
+    } else {
+      toast({
+        title: "Senha atualizada!",
+        description: "Sua senha foi redefinida com sucesso.",
+      })
+    }
+
+    return { error }
+  }
+
   const value = {
     user,
     session,
@@ -140,6 +161,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signOut,
     resetPassword,
+    updatePassword,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

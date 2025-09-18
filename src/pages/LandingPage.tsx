@@ -4,6 +4,7 @@ import HeroSection from '@/components/landingPage/HeroSection';
 import Features from '@/components/landingPage/Features';
 import DashboardPreview from '@/components/landingPage/DashboardPreview';
 import Testimonials from '@/components/landingPage/Testimonals';
+import Pricing from '@/components/landingPage/Pricing';
 import Footer from '@/components/landingPage/Footer';
 
 const LandingPage = () => {
@@ -15,6 +16,7 @@ const LandingPage = () => {
         <Features />
         <DashboardPreview />
         <Testimonials />
+        <Pricing />
       </main>
       <Footer />
     </div>

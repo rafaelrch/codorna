@@ -1,44 +1,64 @@
 import { supabase } from '@/lib/supabase'
-import type { Transaction, CategoryOutput, CategoryInput } from '@/lib/supabase'
 
 export interface TransactionFilters {
   startDate?: string
   endDate?: string
   category?: string
-  type?: 'income' | 'expense'
+  type?: 'saida' | 'entrada'
 }
 
 export interface CreateTransactionData {
+  descricao: string
+  tipo: 'entrada' | 'saida'
+  categoria: string
+  data: string
+  valor: number
+}
+
+
+export interface Transaction {
+  id: number
+  email: string
   name: string
-  description?: string | null
-  category_id: number
-  type: 'income' | 'expense'
-  amount: number
+  telefone: string
+  type: 'entrada' | 'saida'
+  descricao: string
+  valor: number
+  categoria: string
+  created_at: string
 }
 
 class TransactionService {
   // Get all transactions for the current user
   async getTransactions(filters: TransactionFilters = {}): Promise<Transaction[]> {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    console.log('Buscando transações para usuário:', user.email, 'com filtros:', filters);
+
     let query = supabase
-      .from('transactions')
-      .select(`
-        *,
-        category_output:category_output_id(id, name),
-        category_input:category_input_id(id, name)
-      `)
+      .from('transacoes')
+      .select('*')
+      .eq('email', user.email)
       .order('created_at', { ascending: false })
 
     // Apply filters
     if (filters.type) {
+      console.log('Aplicando filtro de tipo:', filters.type);
       query = query.eq('type', filters.type)
     }
 
     if (filters.startDate) {
-      query = query.gte('created_at', filters.startDate + 'T00:00:00')
+      console.log('Aplicando filtro de data início:', filters.startDate);
+      query = query.gte('created_at', filters.startDate)
     }
 
     if (filters.endDate) {
-      query = query.lte('created_at', filters.endDate + 'T23:59:59')
+      console.log('Aplicando filtro de data fim:', filters.endDate);
+      query = query.lte('created_at', filters.endDate)
     }
 
     const { data, error } = await query
@@ -48,16 +68,18 @@ class TransactionService {
       throw new Error('Failed to fetch transactions')
     }
 
-    // Filter by category name if provided
+    console.log('Transações encontradas no banco:', data);
+
+    // Filter by category if provided
     if (filters.category && data) {
-      return data.filter(transaction => {
-        const categoryName = transaction.type === 'expense' 
-          ? transaction.category_output?.name 
-          : transaction.category_input?.name
-        return categoryName === filters.category
-      })
+      const filtered = data.filter(transaction => 
+        transaction.categoria === filters.category
+      )
+      console.log('Transações após filtro de categoria:', filtered);
+      return filtered
     }
 
+    console.log('Retornando transações:', data || []);
     return data || []
   }
 
@@ -69,26 +91,45 @@ class TransactionService {
       throw new Error('User not authenticated')
     }
 
-    // Prepare transaction data with correct category field
+    // Buscar dados do usuário na tabela users
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('first_name, last_name, phone')
+      .eq('id', user.id)
+      .single()
+
+    let userName = 'Usuário'
+    let userPhone = ''
+
+    if (userError) {
+      console.error('Error fetching user data:', userError)
+      // Se não conseguir buscar da tabela users, usar dados do auth
+      userName = user.user_metadata?.full_name || 
+                `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() ||
+                user.email?.split('@')[0] || 'Usuário'
+      userPhone = user.user_metadata?.phone || user.user_metadata?.telefone || ''
+    } else {
+      // Usar dados da tabela users
+      userName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 
+                user.email?.split('@')[0] || 'Usuário'
+      userPhone = userData.phone || ''
+    }
+
     const transactionData = {
-      name: transaction.name,
-      description: transaction.description,
-      type: transaction.type,
-      amount: transaction.amount,
-      user_id: user.id,
-      // Set the appropriate category field based on transaction type
-      category_output_id: transaction.type === 'expense' ? transaction.category_id : null,
-      category_input_id: transaction.type === 'income' ? transaction.category_id : null
+      email: user.email,
+      name: userName,
+      telefone: userPhone,
+      type: transaction.tipo,
+      descricao: transaction.descricao,
+      valor: transaction.valor,
+      categoria: transaction.categoria,
+      created_at: transaction.data
     }
 
     const { data, error } = await supabase
-      .from('transactions')
+      .from('transacoes')
       .insert(transactionData)
-      .select(`
-        *,
-        category_output:category_output_id(id, name),
-        category_input:category_input_id(id, name)
-      `)
+      .select()
       .single()
 
     if (error) {
@@ -99,52 +140,21 @@ class TransactionService {
     return data
   }
 
-  // Update a transaction
-  async updateTransaction(id: string, updates: Partial<CreateTransactionData>): Promise<Transaction> {
-    // Prepare update data with correct category fields
-    const updateData: any = {
-      name: updates.name,
-      description: updates.description,
-      type: updates.type,
-      amount: updates.amount
-    }
 
-    // Handle category updates
-    if (updates.category_id && updates.type) {
-      if (updates.type === 'expense') {
-        updateData.category_output_id = updates.category_id
-        updateData.category_input_id = null
-      } else {
-        updateData.category_input_id = updates.category_id
-        updateData.category_output_id = null
-      }
-    }
-
-    const { data, error } = await supabase
-      .from('transactions')
-      .update(updateData)
-      .eq('id', id)
-      .select(`
-        *,
-        category_output:category_output_id(id, name),
-        category_input:category_input_id(id, name)
-      `)
-      .single()
-
-    if (error) {
-      console.error('Error updating transaction:', error)
-      throw new Error('Failed to update transaction')
-    }
-
-    return data
-  }
 
   // Delete a transaction
-  async deleteTransaction(id: string): Promise<void> {
+  async deleteTransaction(id: number): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
     const { error } = await supabase
-      .from('transactions')
+      .from('transacoes')
       .delete()
       .eq('id', id)
+      .eq('email', user.email)
 
     if (error) {
       console.error('Error deleting transaction:', error)
@@ -152,61 +162,75 @@ class TransactionService {
     }
   }
 
-  // Get expense categories
-  async getExpenseCategories(): Promise<CategoryOutput[]> {
+  // Get categories from categorias table
+  async getExpenseCategories(): Promise<Array<{id: number, nome: string}>> {
     const { data, error } = await supabase
-      .from('categories_output')
-      .select('*')
-      .order('name')
+      .from('categorias')
+      .select('id, nome')
+      .eq('tipo', 'saida')
+      .order('nome')
 
     if (error) {
       console.error('Error fetching expense categories:', error)
-      throw new Error('Failed to fetch expense categories')
+      return []
     }
 
     return data || []
   }
 
   // Get income categories
-  async getIncomeCategories(): Promise<CategoryInput[]> {
+  async getIncomeCategories(): Promise<Array<{id: number, nome: string}>> {
     const { data, error } = await supabase
-      .from('categories_input')
-      .select('*')
-      .order('name')
+      .from('categorias')
+      .select('id, nome')
+      .eq('tipo', 'entrada')
+      .order('nome')
 
     if (error) {
       console.error('Error fetching income categories:', error)
-      throw new Error('Failed to fetch income categories')
+      return []
     }
 
     return data || []
   }
 
   // Get all categories (both income and expense)
-  async getAllCategories(): Promise<Array<{id: number, name: string, type: 'income' | 'expense'}>> {
-    const [expenseCategories, incomeCategories] = await Promise.all([
-      this.getExpenseCategories(),
-      this.getIncomeCategories()
-    ])
+  async getAllCategories(): Promise<Array<{id: number, nome: string, tipo: 'saida' | 'entrada'}>> {
+    console.log('Buscando todas as categorias...');
+    
+    const { data, error } = await supabase
+      .from('categorias')
+      .select('id, nome, tipo')
+      .order('tipo, nome')
 
-    return [
-      ...expenseCategories.map(cat => ({ ...cat, type: 'expense' as const })),
-      ...incomeCategories.map(cat => ({ ...cat, type: 'income' as const }))
-    ]
+    if (error) {
+      console.error('Error fetching all categories:', error)
+      return []
+    }
+
+    console.log('Todas as categorias:', data);
+    return data || [];
   }
 
   // Get transaction statistics
   async getTransactionStats(startDate?: string, endDate?: string) {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
     let query = supabase
-      .from('transactions')
-      .select('type, amount')
+      .from('transacoes')
+      .select('valor, type, created_at')
+      .eq('email', user.email)
 
     if (startDate) {
-      query = query.gte('created_at', startDate + 'T00:00:00')
+      query = query.gte('created_at', startDate)
     }
 
     if (endDate) {
-      query = query.lte('created_at', endDate + 'T23:59:59')
+      query = query.lte('created_at', endDate)
     }
 
     const { data, error } = await query
@@ -217,10 +241,10 @@ class TransactionService {
     }
 
     const stats = data?.reduce((acc, transaction) => {
-      if (transaction.type === 'income') {
-        acc.totalIncome += Number(transaction.amount)
+      if (transaction.type === 'entrada') {
+        acc.totalIncome += Number(transaction.valor)
       } else {
-        acc.totalExpense += Number(transaction.amount)
+        acc.totalExpense += Number(transaction.valor)
       }
       return acc
     }, { totalIncome: 0, totalExpense: 0 })
@@ -229,6 +253,54 @@ class TransactionService {
       totalIncome: stats?.totalIncome || 0,
       totalExpense: stats?.totalExpense || 0,
       balance: (stats?.totalIncome || 0) - (stats?.totalExpense || 0)
+    }
+  }
+
+  // Get monthly statistics
+  async getMonthlyStats(year: number, month: number) {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const startDate = `${year}-${month.toString().padStart(2, '0')}-01`
+    const endDate = `${year}-${month.toString().padStart(2, '0')}-31`
+
+    const { data, error } = await supabase
+      .from('transacoes')
+      .select('valor, type, categoria')
+      .eq('email', user.email)
+      .gte('created_at', startDate)
+      .lte('created_at', endDate)
+
+    if (error) {
+      console.error('Error fetching monthly stats:', error)
+      throw new Error('Failed to fetch monthly stats')
+    }
+
+    const stats = data?.reduce((acc, transaction) => {
+      if (transaction.type === 'entrada') {
+        acc.totalIncome += Number(transaction.valor)
+        acc.incomeByCategory[transaction.categoria] = (acc.incomeByCategory[transaction.categoria] || 0) + Number(transaction.valor)
+      } else {
+        acc.totalExpense += Number(transaction.valor)
+        acc.expenseByCategory[transaction.categoria] = (acc.expenseByCategory[transaction.categoria] || 0) + Number(transaction.valor)
+      }
+      return acc
+    }, { 
+      totalIncome: 0, 
+      totalExpense: 0, 
+      incomeByCategory: {} as Record<string, number>,
+      expenseByCategory: {} as Record<string, number>
+    })
+
+    return {
+      totalIncome: stats?.totalIncome || 0,
+      totalExpense: stats?.totalExpense || 0,
+      balance: (stats?.totalIncome || 0) - (stats?.totalExpense || 0),
+      incomeByCategory: stats?.incomeByCategory || {},
+      expenseByCategory: stats?.expenseByCategory || {}
     }
   }
 

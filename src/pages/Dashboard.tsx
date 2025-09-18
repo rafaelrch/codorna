@@ -115,7 +115,6 @@ export default function Dashboard() {
 
   const dateRange = getDisplayDateRange();
 
-
   return (
     <div className="min-h-screen bg-[#EBEBEB]">
       {/* PRIMEIRA DIVISÃO - Header Controls */}
@@ -184,13 +183,13 @@ export default function Dashboard() {
           {/* Financial Cards - 3 cards com space-between */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FinancialCard
-              title="Entrada"
+              title="Entradas"
               value={transactionService.formatCurrency(stats.totalIncome)}
               type="income"
               loading={loading}
             />
             <FinancialCard
-              title="Saída"
+              title="Saídas"
               value={transactionService.formatCurrency(stats.totalExpense)}
               type="expense"
               loading={loading}

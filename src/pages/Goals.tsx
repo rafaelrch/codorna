@@ -7,7 +7,7 @@ import AddGoalDialog from '@/components/AddGoalDialog'
 import GoalCard from '@/components/GoalCard'
 import { goalService } from '@/services/goalService'
 import { useToast } from '@/hooks/use-toast'
-import type { Goal } from '@/lib/supabase'
+import type { Goal } from '@/services/goalService'
 import { Target, TrendingUp, Calendar, DollarSign, Trophy, ChevronDown, ChevronUp } from 'lucide-react'
 
 export default function Goals() {
@@ -20,6 +20,7 @@ export default function Goals() {
     try {
       setLoading(true)
       const data = await goalService.getGoals()
+      console.log('Goals loaded in page:', data)
       setGoals(data)
     } catch (error) {
       console.error('Erro ao carregar metas:', error)
@@ -47,24 +48,24 @@ export default function Goals() {
 
   // Separate active and completed goals
   const activeGoals = goals.filter(goal => {
-    const progress = goalService.calculateProgress(goal.current_amount, goal.target_amount)
+    const progress = goalService.calculateProgress(goal.valor_atual, goal.valor)
     return progress < 100
   })
 
   const completedGoals = goals.filter(goal => {
-    const progress = goalService.calculateProgress(goal.current_amount, goal.target_amount)
+    const progress = goalService.calculateProgress(goal.valor_atual, goal.valor)
     return progress >= 100
   })
 
   // Calculate statistics
   const stats = goals.reduce((acc, goal) => {
-    const progress = goalService.calculateProgress(goal.current_amount, goal.target_amount)
-    const isCompleted = goalService.isGoalCompleted(goal.current_amount, goal.target_amount)
-    const isOverdue = goal.deadline ? goalService.isGoalOverdue(goal.deadline) : false
+    const progress = goalService.calculateProgress(goal.valor_atual, goal.valor)
+    const isCompleted = goalService.isGoalCompleted(goal.valor_atual, goal.valor)
+    const isOverdue = goal.prazo ? goalService.isGoalOverdue(goal.prazo) : false
 
     acc.totalGoals++
-    acc.totalTarget += goal.target_amount
-    acc.totalCurrent += goal.current_amount
+    acc.totalTarget += goal.valor
+    acc.totalCurrent += goal.valor_atual
     
     if (isCompleted) acc.completedGoals++
     if (isOverdue) acc.overdueGoals++

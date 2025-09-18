@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2, ArrowLeft } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { AuthLayout } from '@/components/AuthLayout'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -27,72 +27,68 @@ export default function ForgotPassword() {
 
   if (sent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">E-mail Enviado!</CardTitle>
-            <CardDescription>
-              Verifique sua caixa de entrada para redefinir sua senha
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-center space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Enviamos um link para <strong>{email}</strong> para você redefinir sua senha.
-              </p>
-              <Link to="/login">
-                <Button className="w-full">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Voltar para Login
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <AuthLayout
+        title="E-mail Enviado! ✅"
+        subtitle="Verifique sua caixa de entrada para redefinir sua senha"
+        description="Enviamos um link para redefinir sua senha."
+        backgroundImage="/idosoSenha.jpg"
+        backgroundImageAlt="Idoso usando o aplicativo Codorna"
+      >
+        <div className="text-center space-y-6">
+          <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-sm text-green-800">
+              Enviamos um link para <strong>{email}</strong> para você redefinir sua senha.
+            </p>
+          </div>
+          
+          <Link to="/login">
+            <Button className="w-full h-12 text-base font-medium">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar para Login
+            </Button>
+          </Link>
+        </div>
+      </AuthLayout>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Esqueceu a Senha?</CardTitle>
-          <CardDescription>
-            Digite seu e-mail para receber um link de redefinição
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
+    <AuthLayout
+      title="Esqueceu a Senha? 🔑"
+      subtitle="Digite seu e-mail para receber um link de redefinição"
+      description="Recupere o acesso à sua conta de forma segura."
+      backgroundImage="/idosoSenha.jpg"
+      backgroundImageAlt="Idoso usando o aplicativo Codorna"
+    >
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="email">E-mail</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="seu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="h-12"
+          />
+        </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Enviar Link
-            </Button>
+        <Button type="submit" className="w-full h-12 text-base font-medium" disabled={loading}>
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Enviar Link
+        </Button>
 
-            <div className="text-center">
-              <Link 
-                to="/login" 
-                className="text-sm text-muted-foreground hover:text-primary inline-flex items-center"
-              >
-                <ArrowLeft className="mr-1 h-3 w-3" />
-                Voltar para Login
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+        <div className="text-center">
+          <Link 
+            to="/login" 
+            className="text-sm text-slate-600 hover:text-blue-600 font-medium inline-flex items-center"
+          >
+            <ArrowLeft className="mr-1 h-3 w-3" />
+            Voltar para Login
+          </Link>
+        </div>
+      </form>
+    </AuthLayout>
   )
 }
