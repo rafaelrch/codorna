@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader } from 'lucide-react';
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  onOpenWaitlist: () => void;
+}
+
+const HeroSection = ({ onOpenWaitlist }: HeroSectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
   
   useEffect(() => {
@@ -33,11 +37,12 @@ const HeroSection = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
-              <a href="https://wa.me/5571993393322?text=Quero%20iniciar%20o%20teste%20gr%C3%A1tis" target="_blank" rel="noopener noreferrer">
-                <Button className="bg-black rounded-full text-white hover:bg-[#208251] hover:text-white text-base h-12 px-8 transition-ease-in-out duration-300 min-h-[48px]">
-                  Experimentar
-                </Button>
-              </a>
+              <Button 
+                className="bg-black rounded-full text-white hover:bg-[#208251] hover:text-white text-base h-12 px-8 transition-ease-in-out duration-300 min-h-[48px]"
+                onClick={onOpenWaitlist}
+              >
+                Entrar na fila de espera
+              </Button>
             </div>
           </div>
           

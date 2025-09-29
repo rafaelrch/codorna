@@ -6,7 +6,11 @@ import { cn } from '@/lib/utils';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Link } from 'react-router-dom';
 
-const Header = () => {
+interface HeaderProps {
+  onOpenWaitlist: () => void;
+}
+
+const Header = ({ onOpenWaitlist }: HeaderProps) => {
   const [activePage, setActivePage] = useState('features');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -112,9 +116,15 @@ const Header = () => {
               
               {/* Mobile button */}
               <div className="flex flex-col gap-2 pt-4 border-t border-gray-200">
-                <a href="https://wa.me/5571993393322?text=Quero%20iniciar%20o%20teste%20gr%C3%A1tis" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full">Experimentar</Button>
-                </a>
+                <Button 
+                  className="w-full bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full"
+                  onClick={() => {
+                    onOpenWaitlist();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Entrar na fila de espera
+                </Button>
               </div>
             </div>
           </div>
@@ -122,9 +132,12 @@ const Header = () => {
         
         <div className="hidden md:flex items-center gap-4">
           <div className="rounded-2xl">
-            <a href="https://wa.me/5571993393322?text=Quero%20iniciar%20o%20teste%20gr%C3%A1tis" target="_blank" rel="noopener noreferrer">
-              <Button className="bg-black bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full">Experimentar</Button>
-            </a>
+            <Button 
+              className="bg-black bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full"
+              onClick={onOpenWaitlist}
+            >
+              Entrar na fila de espera
+            </Button>
           </div>
         </div>
       </header>

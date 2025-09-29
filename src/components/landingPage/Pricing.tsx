@@ -2,7 +2,11 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
-const Pricing = () => {
+interface PricingProps {
+  onOpenWaitlist: () => void;
+}
+
+const Pricing = ({ onOpenWaitlist }: PricingProps) => {
   const plans = [
     {
       name: "Plano",
@@ -87,9 +91,9 @@ const Pricing = () => {
                         ? 'bg-white text-[#208251] hover:bg-gray-100' 
                         : 'bg-[#208251] text-white hover:bg-[#208251]/90'
                     }`}
-                    asChild
+                    onClick={onOpenWaitlist}
                   >
-                    <a href="https://wa.me/5571993393322?text=Quero%20iniciar%20o%20teste%20gr%C3%A1tis" target="_blank" rel="noopener noreferrer">{plan.buttonText}</a>
+                    Entrar na fila de espera
                   </Button>
                 ) : plan.buttonText === "Assinar agora" ? (
                   <Button 

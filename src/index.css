@@ -355,4 +355,22 @@
   .border-cosmic-light {
     border-color: rgba(255, 255, 255, 0.1);
   }
+
+  /* Waitlist popup blur effect */
+  .waitlist-blur {
+    filter: blur(4px);
+    transition: filter 0.3s ease-in-out;
+  }
+  
+  .waitlist-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 40;
+    transition: all 0.3s ease-in-out;
+  }
 }
