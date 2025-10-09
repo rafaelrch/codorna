@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Logo from './Logo';
-import { Menu, X, CircleDot, LayoutDashboard, CreditCard } from 'lucide-react';
+import { Menu, X, CircleDot, LayoutDashboard, CreditCard, HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Link } from 'react-router-dom';
@@ -46,7 +46,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
         
         {/* Desktop navigation */}
         <nav className="hidden md:flex items-center absolute left-1/2 transform -translate-x-1/2">
-          <div className="rounded-full px-1 py-1 backdrop-blur-md bg-background/80 border border-border shadow-lg">
+          <div className="rounded-full px-1 py-1 backdrop-blur-md bg-background/70 border border-border">
             <ToggleGroup type="single" value={activePage} onValueChange={(value) => value && setActivePage(value)}>
               <ToggleGroupItem 
                 value="features"
@@ -77,6 +77,16 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                 onClick={handleNavClick('pricing')}
               >
                 <CreditCard size={16} className="inline-block mr-1.5" /> Planos
+              </ToggleGroupItem>
+              <ToggleGroupItem 
+                value="faq" 
+                className={cn(
+                  "px-4 py-2 rounded-full transition-colors relative",
+                  activePage === 'faq' ? 'text-accent-foreground bg-accent' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                )}
+                onClick={handleNavClick('faq')}
+              >
+                <HelpCircle size={16} className="inline-block mr-1.5" /> FAQ
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -112,6 +122,15 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                 onClick={handleNavClick('pricing')}
               >
                 <CreditCard size={16} className="inline-block mr-1.5" /> Planos
+              </a>
+              <a 
+                href="#faq" 
+                className={`px-3 py-2 text-sm rounded-md transition-colors ${
+                  activePage === 'faq' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                }`}
+                onClick={handleNavClick('faq')}
+              >
+                <HelpCircle size={16} className="inline-block mr-1.5" /> FAQ
               </a>
               
               {/* Mobile button */}

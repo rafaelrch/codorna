@@ -45,7 +45,7 @@ export const WaitlistPopup = ({ isOpen, onClose }: WaitlistPopupProps) => {
     }
 
     if (formData.phone.length < 13) {
-      alert('O telefone deve ter pelo menos 11 dígitos após o código do país (55)')
+      alert('O telefone deve ter  pelo menos 11 dígitos após o código do país (55)')
       return
     }
 
@@ -84,7 +84,7 @@ export const WaitlistPopup = ({ isOpen, onClose }: WaitlistPopupProps) => {
             Entre na fila de espera
           </DialogTitle>
           <p className="text-sm text-gray-600 mt-2 text-center">
-            Seja um dos primeiros a testar o Codorna quando estiver disponível!
+            Seja um dos primeiros a utilizar quando estiver disponível!
           </p>
         </DialogHeader>
 

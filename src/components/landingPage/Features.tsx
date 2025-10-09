@@ -1,35 +1,18 @@
 import React from 'react';
-import { Layers, Grid3x3, ListCheck, BookOpen, Star, LayoutDashboard } from "lucide-react";
 
 const Features = () => {
-  const features = [
+  const images = [
     {
-      title: "Controle de Gastos",
-      description: "Organize e categorize suas saídas para ter controle total sobre seus gastos.",
-      icon: (
-        <Layers size={24} className="text-black" />
-      )
+      src: "/FEATURES-1.png",
+      alt: "Feature 1"
     },
     {
-      title: "Dashboard Intuitivo",
-      description: "Acompanhe sua situação financeira com gráficos e relatórios em tempo real.",
-      icon: (
-        <Grid3x3 size={24} className="text-black" />
-      )
+      src: "/FEATURES-2.png",
+      alt: "Feature 2"
     },
     {
-      title: "Metas Financeiras",
-      description: "Defina e acompanhe suas metas financeiras com ferramentas inteligentes.",
-      icon: (
-        <LayoutDashboard size={24} className="text-black" />
-      )
-    },
-    {
-      title: "Relatórios Detalhados",
-      description: "Gere relatórios completos sobre sua situação financeira.",
-      icon: (
-        <ListCheck size={24} className="text-black" />
-      )
+      src: "/FEATURES-3.png",
+      alt: "Feature 3"
     }
   ];
   
@@ -45,17 +28,17 @@ const Features = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {features.map((feature, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 max-w-7xl mx-auto ">
+          {images.map((image, index) => (
             <div
               key={index}
-              className="rounded-xl border border-gray-200 bg-white  p-6 hover:border-gray-400 transition-easy-in-out  duration-300"
+              className="rounded-xl overflow-hidden"
             >
-              <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-6">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl font-medium tracking-tighter mb-3 text-black">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <img 
+                src={image.src} 
+                alt={image.alt}
+                className="w-full h-auto object-cover"
+              />
             </div>
           ))}
         </div>
