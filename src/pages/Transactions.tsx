@@ -25,15 +25,11 @@ export default function Transactions() {
     data: new Date().toISOString().split('T')[0],
     valor: ''
   });
-  // Definir datas padrão (últimos 30 dias)
+  // Definir datas padrão (sem filtro por padrão para mostrar todos os registros)
   const getDefaultDates = () => {
-    const today = new Date();
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(today.getDate() - 30);
-    
     return {
-      start: thirtyDaysAgo.toISOString().split('T')[0],
-      end: today.toISOString().split('T')[0]
+      start: '', // Sem filtro de data inicial
+      end: '' // Sem filtro de data final
     };
   };
 
@@ -48,10 +44,10 @@ export default function Transactions() {
       setLoading(true);
       console.log('Carregando transações...', { startDate, endDate });
       
-      // Buscar transações com filtros de data
+      // Buscar transações com filtros de data (apenas se as datas estiverem preenchidas)
       const data = await transactionService.getTransactions({
-        startDate,
-        endDate,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
         category: '',
         type: undefined,
       });
@@ -189,6 +185,15 @@ export default function Transactions() {
     return categories.filter(cat => cat.tipo === tipo);
   };
 
+  // Verificar se há filtros ativos
+  const hasActiveFilters = startDate || endDate;
+
+  // Função para limpar filtros
+  const clearFilters = () => {
+    setStartDate('');
+    setEndDate('');
+  };
+
   return (
     <div className="min-h-screen bg-[#EBEBEB]">
       <PageHeader title="Transações">
@@ -200,6 +205,7 @@ export default function Transactions() {
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className="w-36 h-8 bg-[#F8F6F7] rounded-lg text-black"
+              placeholder="Data inicial"
             />
             <span>Até:</span>
             <Input
@@ -207,8 +213,19 @@ export default function Transactions() {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className="w-36 h-8 bg-[#F8F6F7] rounded-lg text-black"
+              placeholder="Data final"
             />
           </div>
+          {hasActiveFilters && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={clearFilters}
+              className="h-8"
+            >
+              Limpar filtros
+            </Button>
+          )}
           <Dialog open={addTransactionOpen} onOpenChange={setAddTransactionOpen}>
             <DialogTrigger asChild>
               <Button className="bg-black px-6 rounded-lg text-white">
@@ -320,9 +337,6 @@ export default function Transactions() {
                     Data
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-black">
-                    Nome
-                  </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-black">
                     Descrição
                   </th>
                   <th className="px-6 py-4 text-left text-sm font-semibold text-black">
@@ -348,9 +362,6 @@ export default function Transactions() {
                         <Skeleton className="h-4 w-20" />
                       </td>
                       <td className="px-6 py-4">
-                        <Skeleton className="h-4 w-24" />
-                      </td>
-                      <td className="px-6 py-4">
                         <Skeleton className="h-4 w-32" />
                       </td>
                       <td className="px-6 py-4">
@@ -369,7 +380,7 @@ export default function Transactions() {
                   ))
                 ) : transactions.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                       Nenhuma transação encontrada.
                     </td>
                   </tr>
@@ -377,10 +388,7 @@ export default function Transactions() {
                   transactions.map((transaction) => (
                     <tr key={transaction.id} className="hover:bg-muted/20 transition-colors">
                       <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {transactionService.formatDateForDisplay(transaction.created_at)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-[#878787]">
-                        <div className="font-regular">{transaction.name}</div>
+                        {transactionService.formatDateForDisplay(transaction.data_hora)}
                       </td>
                       <td className="px-6 py-4 text-sm text-[#878787]">
                         <div className="font-regular">{transaction.descricao}</div>
@@ -390,14 +398,14 @@ export default function Transactions() {
                       </td>
                       <td className="px-6 py-4">
                         <Badge 
-                          variant={transaction.type === 'saida' ? 'destructive' : 'default'}
+                          variant={transaction.tipo === 'saida' ? 'destructive' : 'default'}
                           className={
-                            transaction.type === 'saida' 
+                            transaction.tipo === 'saida' 
                               ? 'bg-destructive-light text-destructive hover:bg-destructive-light'
                               : 'bg-success-light text-success hover:bg-success-light'
                           }
                         >
-                          {transaction.type === 'saida' ? 'Saída' : 'Entrada'}
+                          {transaction.tipo === 'saida' ? 'Saída' : 'Entrada'}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right text-sm font-regular text-[#000000] tracking-tighter">

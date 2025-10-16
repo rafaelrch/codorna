@@ -9,30 +9,31 @@ interface PricingProps {
 const Pricing = ({ onOpenWaitlist }: PricingProps) => {
   const plans = [
     {
-      name: "Plano",
+      name: "Gratuito",
       price: "Grátis",
-      description: "7 Dias de teste grátis",
+      description: "Para sempre",
       features: [
-        "7 Dias de teste grátis",
+        "Acesso completo à plataforma",
         "IA no WhatsApp",
-        "Acesso a plataforma"
+        "Todas as funcionalidades",
+        "Suporte da comunidade"
       ],
       buttonText: "Comece Agora",
       isPro: false
     },
-    // {
-    //   name: "Pro",
-    //   price: "R$ 19,90",
-    //   description: "/mês",
-    //   features: [
-    //     "Acesso a plataforma",
-    //     "IA no whatsapp",
-    //     "Acesso antecipado a novas funcionalidades",
-    //     "Suporte"
-    //   ],
-    //   buttonText: "Assinar agora",
-    //   isPro: true
-    // }
+    {
+      name: "PRO",
+      price: "R$ 19,00",
+      description: "/mês",
+      features: [
+        "Acesso completo à plataforma",
+        "IA no WhatsApp",
+        "Acesso antecipado a novas funcionalidades",
+        "Suporte prioritário"
+      ],
+      buttonText: "Assinar agora",
+      isPro: true
+    }
   ];
   
   return (
@@ -40,7 +41,7 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
       <div className="max-w-5xl mx-auto space-y-16">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-6xl font-medium tracking-tighter text-gray-900">
-            Comece seu <span className="text-[#208251]">teste grátis</span>
+            Escolha seu <span className="text-[#208251]">plano</span>
           </h2>
         </div>
         
@@ -84,35 +85,18 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
                   ))}
                 </div>
                 
-                {plan.buttonText === "Comece Agora" ? (
+                {plan.isPro ? (
                   <Button 
-                    className={`w-full rounded-full font-regular py-6 transition-all duration-200 ${
-                      plan.isPro 
-                        ? 'bg-white text-[#208251] hover:bg-gray-100' 
-                        : 'bg-[#208251] text-white hover:bg-[#208251]/90'
-                    }`}
-                    onClick={onOpenWaitlist}
-                  >
-                    Entrar na fila de espera
-                  </Button>
-                ) : plan.buttonText === "Assinar agora" ? (
-                  <Button 
-                    className={`w-full rounded-full font-regular py-6 transition-all duration-200 ${
-                      plan.isPro 
-                        ? 'bg-white text-[#208251] hover:bg-gray-100' 
-                        : 'bg-black text-white hover:bg-black/90'
-                    }`}
+                    className="w-full rounded-full font-regular py-6 transition-all duration-200 bg-white text-[#208251] hover:bg-gray-100"
                     asChild
                   >
-                    <a href="https://buy.stripe.com/test_4gM00kf4D6NLfkZ2JW1Nu00" target="_blank" rel="noopener noreferrer">{plan.buttonText}</a>
+                    <a href="https://pay.kirvano.com/0601b095-cab7-4769-9ea6-0b498f96a32b" target="_blank" rel="noopener noreferrer">
+                      {plan.buttonText}
+                    </a>
                   </Button>
                 ) : (
                   <Button 
-                    className={`w-full rounded-full font-regular py-6 transition-all duration-200 ${
-                      plan.isPro 
-                        ? 'bg-white text-[#208251] hover:bg-gray-100' 
-                        : 'bg-black text-white hover:bg-black/90'
-                    }`}
+                    className="w-full rounded-full font-regular py-6 transition-all duration-200 bg-[#208251] text-white hover:bg-[#208251]/90"
                     asChild
                   >
                     <Link to="/signup">{plan.buttonText}</Link>

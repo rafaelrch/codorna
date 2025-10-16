@@ -15,16 +15,15 @@ export interface UpdateGoalData {
 }
 
 export interface Goal {
-  id: number
-  user_id: string
+  id: string  // uuid
   email: string
   telefone?: string
   nome: string
   valor: number
   valor_atual: number
-  prazo: string | null
-  created_at: string
-  updated_at: string
+  prazo?: string  // date
+  created_at: string  // timestamptz
+  updated_at: string  // timestamptz
 }
 
 class GoalService {
@@ -39,7 +38,7 @@ class GoalService {
     const { data, error } = await supabase
       .from('metas')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('email', user.email)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -58,26 +57,10 @@ class GoalService {
       throw new Error('User not authenticated')
     }
 
-    // Buscar dados do usuário na tabela users
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('first_name, last_name, phone')
-      .eq('id', user.id)
-      .single()
-
-    let userPhone = ''
-
-    if (userError) {
-      console.error('Error fetching user data:', userError)
-      // Se não conseguir buscar da tabela users, usar dados do auth
-      userPhone = user.user_metadata?.phone || user.user_metadata?.telefone || ''
-    } else {
-      // Usar dados da tabela users
-      userPhone = userData.phone || ''
-    }
+    // Obter telefone do usuário dos metadados de autenticação
+    let userPhone = user.user_metadata?.phone || user.user_metadata?.telefone || ''
 
     const goalData = {
-      user_id: user.id,
       email: user.email,
       telefone: userPhone,
       nome: goal.nome,
@@ -102,7 +85,7 @@ class GoalService {
   }
 
   // Update a goal
-  async updateGoal(id: number, updates: UpdateGoalData): Promise<Goal> {
+  async updateGoal(id: string, updates: UpdateGoalData): Promise<Goal> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -127,7 +110,7 @@ class GoalService {
       .from('metas')
       .update(updateData)
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('email', user.email)
       .select()
       .single()
 
@@ -140,7 +123,7 @@ class GoalService {
   }
 
   // Delete a goal
-  async deleteGoal(id: number): Promise<void> {
+  async deleteGoal(id: string): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -151,7 +134,7 @@ class GoalService {
       .from('metas')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('email', user.email)
 
     if (error) {
       console.error('Error deleting goal:', error)
@@ -160,7 +143,7 @@ class GoalService {
   }
 
   // Add amount to goal
-  async addAmountToGoal(id: number, amount: number): Promise<Goal> {
+  async addAmountToGoal(id: string, amount: number): Promise<Goal> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -172,7 +155,7 @@ class GoalService {
       .from('metas')
       .select('valor_atual, valor')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('email', user.email)
       .single()
 
     if (fetchError) {
@@ -186,7 +169,7 @@ class GoalService {
   }
 
   // Remove amount from goal
-  async removeAmountFromGoal(id: number, amount: number): Promise<Goal> {
+  async removeAmountFromGoal(id: string, amount: number): Promise<Goal> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -198,7 +181,7 @@ class GoalService {
       .from('metas')
       .select('valor_atual')
       .eq('id', id)
-      .eq('user_id', user.id)
+      .eq('email', user.email)
       .single()
 
     if (fetchError) {

@@ -18,14 +18,14 @@ export interface CreateTransactionData {
 
 export interface Transaction {
   id: number
-  email: string
-  name: string
-  telefone: string
-  type: 'entrada' | 'saida'
-  descricao: string
-  valor: number
+  data_hora: string
+  responsavel: string
   categoria: string
-  created_at: string
+  tipo: 'entrada' | 'saida'
+  valor: number
+  descricao: string
+  criado_em: string
+  email: string
 }
 
 class TransactionService {
@@ -40,25 +40,25 @@ class TransactionService {
     console.log('Buscando transações para usuário:', user.email, 'com filtros:', filters);
 
     let query = supabase
-      .from('transacoes')
+      .from('financeiro_registros')
       .select('*')
       .eq('email', user.email)
-      .order('created_at', { ascending: false })
+      .order('criado_em', { ascending: false })
 
     // Apply filters
     if (filters.type) {
       console.log('Aplicando filtro de tipo:', filters.type);
-      query = query.eq('type', filters.type)
+      query = query.eq('tipo', filters.type)
     }
 
     if (filters.startDate) {
       console.log('Aplicando filtro de data início:', filters.startDate);
-      query = query.gte('created_at', filters.startDate)
+      query = query.gte('data_hora', filters.startDate)
     }
 
     if (filters.endDate) {
       console.log('Aplicando filtro de data fim:', filters.endDate);
-      query = query.lte('created_at', filters.endDate)
+      query = query.lte('data_hora', filters.endDate)
     }
 
     const { data, error } = await query
@@ -98,37 +98,32 @@ class TransactionService {
       .eq('id', user.id)
       .single()
 
-    let userName = 'Usuário'
     let userPhone = ''
 
     if (userError) {
       console.error('Error fetching user data:', userError)
       // Se não conseguir buscar da tabela users, usar dados do auth
-      userName = user.user_metadata?.full_name || 
-                `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() ||
-                user.email?.split('@')[0] || 'Usuário'
       userPhone = user.user_metadata?.phone || user.user_metadata?.telefone || ''
     } else {
       // Usar dados da tabela users
-      userName = `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || 
-                user.email?.split('@')[0] || 'Usuário'
       userPhone = userData.phone || ''
     }
 
-    const transactionData = {
-      email: user.email,
-      name: userName,
-      telefone: userPhone,
-      type: transaction.tipo,
-      descricao: transaction.descricao,
-      valor: transaction.valor,
+    // Salvar na tabela financeiro_registros
+    const financeiroRegistroData = {
+      data_hora: transaction.data, // Data escolhida pelo usuário (quando a transação ocorreu)
+      responsavel: userPhone, // Número de telefone do usuário
       categoria: transaction.categoria,
-      created_at: transaction.data
+      tipo: transaction.tipo,
+      valor: transaction.valor,
+      descricao: transaction.descricao,
+      criado_em: new Date().toISOString(), // Timestamp atual (quando o registro foi inserido no banco)
+      email: user.email
     }
 
     const { data, error } = await supabase
-      .from('transacoes')
-      .insert(transactionData)
+      .from('financeiro_registros')
+      .insert(financeiroRegistroData)
       .select()
       .single()
 
@@ -151,7 +146,7 @@ class TransactionService {
     }
 
     const { error } = await supabase
-      .from('transacoes')
+      .from('financeiro_registros')
       .delete()
       .eq('id', id)
       .eq('email', user.email)
@@ -221,16 +216,16 @@ class TransactionService {
     }
 
     let query = supabase
-      .from('transacoes')
-      .select('valor, type, created_at')
+      .from('financeiro_registros')
+      .select('valor, tipo, criado_em')
       .eq('email', user.email)
 
     if (startDate) {
-      query = query.gte('created_at', startDate)
+      query = query.gte('criado_em', startDate)
     }
 
     if (endDate) {
-      query = query.lte('created_at', endDate)
+      query = query.lte('criado_em', endDate)
     }
 
     const { data, error } = await query
@@ -241,7 +236,7 @@ class TransactionService {
     }
 
     const stats = data?.reduce((acc, transaction) => {
-      if (transaction.type === 'entrada') {
+      if (transaction.tipo === 'entrada') {
         acc.totalIncome += Number(transaction.valor)
       } else {
         acc.totalExpense += Number(transaction.valor)
@@ -268,11 +263,11 @@ class TransactionService {
     const endDate = `${year}-${month.toString().padStart(2, '0')}-31`
 
     const { data, error } = await supabase
-      .from('transacoes')
-      .select('valor, type, categoria')
+      .from('financeiro_registros')
+      .select('valor, tipo, categoria')
       .eq('email', user.email)
-      .gte('created_at', startDate)
-      .lte('created_at', endDate)
+      .gte('criado_em', startDate)
+      .lte('criado_em', endDate)
 
     if (error) {
       console.error('Error fetching monthly stats:', error)
@@ -280,7 +275,7 @@ class TransactionService {
     }
 
     const stats = data?.reduce((acc, transaction) => {
-      if (transaction.type === 'entrada') {
+      if (transaction.tipo === 'entrada') {
         acc.totalIncome += Number(transaction.valor)
         acc.incomeByCategory[transaction.categoria] = (acc.incomeByCategory[transaction.categoria] || 0) + Number(transaction.valor)
       } else {

@@ -133,31 +133,40 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                 <HelpCircle size={16} className="inline-block mr-1.5" /> FAQ
               </a>
               
-              {/* Mobile button */}
+              {/* Mobile buttons */}
               <div className="flex flex-col gap-2 pt-4 border-t border-gray-200">
                 <Button 
-                  className="w-full bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full"
-                  onClick={() => {
-                    onOpenWaitlist();
-                    setMobileMenuOpen(false);
-                  }}
+                  variant="outline" 
+                  className="w-full rounded-full border-gray-300 hover:bg-gray-50"
+                  asChild
                 >
-                  Entrar na fila de espera
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Entrar</Link>
+                </Button>
+                <Button 
+                  className="w-full bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full"
+                  asChild
+                >
+                  <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>Cadastrar</Link>
                 </Button>
               </div>
             </div>
           </div>
         )}
         
-        <div className="hidden md:flex items-center gap-4">
-          <div className="rounded-2xl">
-            <Button 
-              className="bg-black bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full"
-              onClick={onOpenWaitlist}
-            >
-              Entrar na fila de espera
-            </Button>
-          </div>
+        <div className="hidden md:flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            className="rounded-full border-gray-300 hover:bg-gray-50"
+            asChild
+          >
+            <Link to="/login">Entrar</Link>
+          </Button>
+          <Button 
+            className="bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full"
+            asChild
+          >
+            <Link to="/signup">Cadastrar</Link>
+          </Button>
         </div>
       </header>
     </div>

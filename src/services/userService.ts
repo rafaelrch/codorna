@@ -3,32 +3,37 @@ import { supabase } from '@/lib/supabase'
 export interface UserData {
   id: string
   user_id: string
-  first_name: string
-  last_name: string
-  name: string
+  nome: string
   email: string
   telefone: string
-  is_active: boolean
+  trial_days: number
+  trial_start_at: string
+  trial_end_at: string
+  status: string
+  plan: string
   created_at: string
   updated_at: string
 }
 
 export interface CreateUserData {
-  first_name: string
-  last_name: string
+  nome: string
   email: string
   telefone?: string
+  plan: 'trial' | 'pro'
 }
 
 export interface UpdateUserData {
-  first_name?: string
-  last_name?: string
+  nome?: string
   telefone?: string
-  is_active?: boolean
+  plan?: string
+  status?: string
+  trial_days?: number
+  trial_start_at?: string
+  trial_end_at?: string
 }
 
 class UserService {
-  // Obter dados do usuário atual da tabela DADOS
+  // Obter dados do usuário atual da tabela users_2
   async getCurrentUserData(): Promise<UserData | null> {
     const { data: { user } } = await supabase.auth.getUser()
     
@@ -37,47 +42,52 @@ class UserService {
     }
 
     const { data, error } = await supabase
-      .from('dados')
+      .from('users_2')
       .select('*')
       .eq('user_id', user.id)
-      .eq('type', 'user')
       .single()
 
     if (error) {
-      console.error('Erro ao buscar dados do usuário:', error)
       return null
     }
 
     return data
   }
 
-  // Criar usuário na tabela DADOS
+  // Criar usuário na tabela users_2 (versão simplificada)
   async createUser(userId: string, userData: CreateUserData): Promise<UserData> {
+    const now = new Date()
+    const trialStartAt = now.toISOString()
+    const trialEndAt = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000)).toISOString() // 7 dias depois
+
+    // Dados corretos para a constraint users_2_status_check
+    const insertData: any = {
+      user_id: userId,
+      nome: userData.nome,
+      email: userData.email,
+      telefone: userData.telefone || '',
+      plan: userData.plan,
+      status: userData.plan, // Usar o mesmo valor do plan (trial ou pro)
+      trial_days: 7,
+      trial_start_at: trialStartAt,
+      trial_end_at: trialEndAt,
+      created_at: now.toISOString(),
+      updated_at: now.toISOString()
+    }
+
     const { data, error } = await supabase
-      .from('dados')
-      .insert({
-        user_id: userId,
-        type: 'user',
-        first_name: userData.first_name,
-        last_name: userData.last_name,
-        name: `${userData.first_name} ${userData.last_name}`,
-        email: userData.email,
-        telefone: userData.telefone || '',
-        is_active: true,
-        created_at: new Date().toISOString()
-      })
+      .from('users_2')
+      .insert(insertData)
       .select()
       .single()
 
     if (error) {
-      console.error('Erro ao criar usuário na tabela DADOS:', error)
-      throw new Error('Falha ao criar usuário')
+      throw new Error(`Falha ao criar usuário: ${error.message}`)
     }
-
     return data
   }
 
-  // Atualizar dados do usuário na tabela DADOS
+  // Atualizar dados do usuário na tabela users_2
   async updateUser(updates: UpdateUserData): Promise<UserData> {
     const { data: { user } } = await supabase.auth.getUser()
     
@@ -86,56 +96,46 @@ class UserService {
     }
 
     // Preparar dados de atualização
-    const updateData: any = { ...updates }
-    
-    // Se atualizar nome ou sobrenome, atualizar também o campo name
-    if (updates.first_name || updates.last_name) {
-      const currentData = await this.getCurrentUserData()
-      if (currentData) {
-        const newFirstName = updates.first_name || currentData.first_name
-        const newLastName = updates.last_name || currentData.last_name
-        updateData.name = `${newFirstName} ${newLastName}`
-      }
+    const updateData: any = { 
+      ...updates,
+      updated_at: new Date().toISOString()
     }
 
     const { data, error } = await supabase
-      .from('dados')
+      .from('users_2')
       .update(updateData)
       .eq('user_id', user.id)
-      .eq('type', 'user')
       .select()
       .single()
 
     if (error) {
-      console.error('Erro ao atualizar usuário:', error)
       throw new Error('Falha ao atualizar usuário')
     }
 
     return data
   }
 
-  // Verificar se usuário existe na tabela DADOS
-  async userExistsInDados(userId: string): Promise<boolean> {
+  // Verificar se usuário existe na tabela users_2
+  async userExistsInUsers2(userId: string): Promise<boolean> {
     const { data, error } = await supabase
-      .from('dados')
+      .from('users_2')
       .select('id')
       .eq('user_id', userId)
-      .eq('type', 'user')
       .single()
 
     return !error && !!data
   }
 
-  // Sincronizar usuário do Supabase Auth para tabela DADOS
-  async syncUserFromAuth(): Promise<UserData | null> {
+  // Sincronizar usuário do Supabase Auth para tabela users_2
+  async syncUserFromAuth(plan: 'trial' | 'pro' = 'trial'): Promise<UserData | null> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
       return null
     }
 
-    // Verificar se já existe na tabela DADOS
-    const exists = await this.userExistsInDados(user.id)
+    // Verificar se já existe na tabela users_2
+    const exists = await this.userExistsInUsers2(user.id)
     
     if (exists) {
       return this.getCurrentUserData()
@@ -144,10 +144,10 @@ class UserService {
     // Se não existe, criar
     const userData = user.user_metadata || {}
     const createData: CreateUserData = {
-      first_name: userData.first_name || '',
-      last_name: userData.last_name || '',
+      nome: `${userData.first_name || ''} ${userData.last_name || ''}`.trim() || user.email?.split('@')[0] || 'Usuário',
       email: user.email || '',
-      telefone: userData.phone || ''
+      telefone: userData.phone || userData.telefone || '',
+      plan: plan
     }
 
     return this.createUser(user.id, createData)

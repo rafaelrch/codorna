@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface HeroSectionProps {
   onOpenWaitlist: () => void;
@@ -38,10 +39,10 @@ const HeroSection = ({ onOpenWaitlist }: HeroSectionProps) => {
             
             <div className="flex flex-col sm:flex-row gap-4 pt-6">
               <Button 
-                className="bg-black rounded-full text-white hover:bg-[#208251] hover:text-white text-base h-12 px-8 transition-ease-in-out duration-300 min-h-[48px]"
-                onClick={onOpenWaitlist}
+                className="bg-[#208251] rounded-full text-white hover:bg-[#208251]/90 text-base h-12 px-8 transition-ease-in-out duration-300 min-h-[48px]"
+                asChild
               >
-                Entrar na fila de espera
+                <Link to="/signup">Começar Gratuitamente</Link>
               </Button>
             </div>
           </div>

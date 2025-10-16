@@ -2,16 +2,21 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
+import { userService } from '@/services/userService'
+import { useNavigate } from 'react-router-dom'
 
 interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
   signUp: (email: string, password: string, userData: {
-    first_name: string
-    last_name: string
-    phone?: string
-  }) => Promise<{ error: any }>
+    nome: string
+    telefone?: string
+  }, navigate?: any) => Promise<{ error: any }>
+  signUpPro: (email: string, password: string, userData: {
+    nome: string
+    telefone?: string
+  }, navigate?: any) => Promise<{ error: any }>
   signIn: (email: string, password: string) => Promise<{ error: any }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: any }>
@@ -54,16 +59,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [toast])
 
   const signUp = async (email: string, password: string, userData: {
-    first_name: string
-    last_name: string
-    phone?: string
-  }) => {
+    nome: string
+    telefone?: string
+  }, navigate?: any) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: userData,
-        emailRedirectTo: `${window.location.origin}/email-confirm`
+        data: {
+          first_name: userData.nome,
+          last_name: '',
+          phone: userData.telefone
+        }
       }
     })
 
@@ -73,14 +80,132 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: error.message,
         variant: "destructive",
       })
-    } else if (data.user && !data.user.email_confirmed_at) {
-      toast({
-        title: "Cadastro realizado!",
-        description: "Verifique seu e-mail para confirmar a conta. Após a confirmação, você será redirecionado para o login.",
-      })
+      return { error }
+    }
+    
+    // Se o usuário foi criado com sucesso, salvar nas tabelas
+    if (data.user) {
+      try {
+        const { data: rpcData, error: rpcError } = await supabase.rpc('create_trial_user', {
+          p_user_id: data.user.id,
+          p_user_email: data.user.email,
+          p_user_nome: userData.nome,
+          p_user_telefone: userData.telefone || ''
+        })
+
+        if (rpcError) {
+          toast({
+            title: "Aviso",
+            description: "Usuário criado, mas houve um problema ao salvar dados adicionais.",
+            variant: "destructive",
+          })
+        } else {
+          if (rpcData && rpcData.success === false) {
+            toast({
+              title: "Erro",
+              description: `Erro na função RPC: ${rpcData.message}`,
+              variant: "destructive",
+            })
+          } else {
+            toast({
+              title: "Cadastro realizado!",
+              description: "Bem-vindo ao Codorna! Seu período de teste de 7 dias começou agora.",
+            })
+          }
+        }
+      } catch (error) {
+        toast({
+          title: "Aviso",
+          description: "Usuário criado, mas houve um problema ao salvar dados adicionais.",
+          variant: "destructive",
+        })
+      }
+
+      // Redirecionar para o dashboard
+      if (navigate) {
+        setTimeout(() => {
+          navigate('/dashboard')
+        }, 1000)
+      }
     }
 
-    return { error }
+    return { error: null }
+  }
+
+  const signUpPro = async (email: string, password: string, userData: {
+    nome: string
+    telefone?: string
+  }, navigate?: any) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: userData.nome,
+          last_name: '',
+          phone: userData.telefone,
+          subscription_type: 'pro',
+          is_pro: true
+        }
+      }
+    })
+
+    if (error) {
+      toast({
+        title: "Erro no cadastro",
+        description: error.message,
+        variant: "destructive",
+      })
+      return { error }
+    }
+
+    // Se o usuário foi criado com sucesso, salvar na tabela users_2
+    if (data.user) {
+      try {
+        const { data: rpcData, error: rpcError } = await supabase.rpc('create_pro_user', {
+          p_user_id: data.user.id,
+          p_user_email: data.user.email,
+          p_user_nome: userData.nome,
+          p_user_telefone: userData.telefone
+        })
+
+        if (rpcError) {
+          toast({
+            title: "Erro",
+            description: "Erro ao criar usuário PRO.",
+            variant: "destructive",
+          })
+        } else {
+          if (rpcData && rpcData.success === false) {
+            toast({
+              title: "Erro",
+              description: `Erro na função RPC: ${rpcData.message}`,
+              variant: "destructive",
+            })
+          } else {
+            toast({
+              title: "Cadastro PRO realizado!",
+              description: "Bem-vindo ao Codorna PRO!",
+            })
+          }
+        }
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao salvar dados do usuário.",
+          variant: "destructive",
+        })
+      }
+
+      // Redirecionar para o login
+      if (navigate) {
+        setTimeout(() => {
+          navigate('/login')
+        }, 1000)
+      }
+    }
+
+    return { error: null }
   }
 
   const signIn = async (email: string, password: string) => {
@@ -158,6 +283,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     signUp,
+    signUpPro,
     signIn,
     signOut,
     resetPassword,
@@ -167,7 +293,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext)
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')

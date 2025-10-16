@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Crown } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { AuthLayout } from '@/components/AuthLayout'
 
-export default function Signup() {
+export default function SignupPro() {
   const [formData, setFormData] = useState({
     nome: '',
     phone: '55',
@@ -19,7 +19,7 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { signUp } = useAuth()
+  const { signUpPro } = useAuth()
   const navigate = useNavigate()
 
   // Função para formatar telefone brasileiro
@@ -87,26 +87,27 @@ export default function Signup() {
       return
     }
 
-          setLoading(true)
-          const { error } = await signUp(formData.email, formData.password, {
-            nome: formData.nome,
-            telefone: formData.phone
-          }, navigate)
-          
-          // If signup successful, redirect will happen automatically via AuthContext
-          setLoading(false)
+    setLoading(true)
+    const { error } = await signUpPro(formData.email, formData.password, {
+      nome: formData.nome,
+      telefone: formData.phone
+    }, navigate)
+    
+    // If signup successful, redirect will happen automatically via AuthContext
+    setLoading(false)
   }
-
 
   return (
     <AuthLayout
-      title="Olá! Bem-vindo ao Codorna 👋"
+      title="Cadastro PRO - Codorna 👑"
       subtitle=""
-      description="Gerencie suas finanças de forma simples e eficiente."
+      description="Acesso completo a todas as funcionalidades premium."
       backgroundImage="/mulherCadastro.jpg"
       backgroundImageAlt="Mulher usando o aplicativo Codorna"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
+    
+
         <div className="space-y-2">
           <Label htmlFor="nome">Nome Completo *</Label>
           <Input
@@ -147,7 +148,6 @@ export default function Signup() {
             className="h-12"
           />
         </div>
-
 
         <div className="space-y-2">
           <Label htmlFor="password">Senha</Label>
@@ -207,9 +207,10 @@ export default function Signup() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full h-12 text-base font-medium bg-[#208251] hover:bg-[#1e774a]" disabled={loading}>
+        <Button type="submit" className="w-full h-12 text-base font-medium bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white border-0" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Criar Conta
+          <Crown className="mr-2 h-4 w-4" />
+          Criar Conta PRO
         </Button>
 
         <div className="text-center">
@@ -217,6 +218,15 @@ export default function Signup() {
             Já tem uma conta?{' '}
             <Link to="/login" className="text-blue-600 hover:underline font-medium">
               Faça login
+            </Link>
+          </span>
+        </div>
+
+        <div className="text-center">
+          <span className="text-sm text-slate-600">
+            Quer uma conta gratuita?{' '}
+            <Link to="/signup" className="text-blue-600 hover:underline font-medium">
+              Cadastro Trial
             </Link>
           </span>
         </div>

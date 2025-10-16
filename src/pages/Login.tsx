@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { AuthLayout } from '@/components/AuthLayout'
 
@@ -10,6 +12,9 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const { signIn } = useAuth()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -18,9 +23,15 @@ export default function Login() {
       return
     }
 
-    // Apenas validar se os campos estão preenchidos e redirecionar para WhatsApp
-    // Não fazer autenticação real
-    window.open('https://wa.me/5571993393322?text=Quero%20fazer%20login%20no%20Codorna', '_blank')
+    setLoading(true)
+    const { error } = await signIn(email, password)
+    
+    if (!error) {
+      // Redirecionar para o dashboard após login bem-sucedido
+      navigate('/dashboard')
+    }
+    
+    setLoading(false)
   }
 
   return (
@@ -73,7 +84,8 @@ export default function Login() {
           </div>
         </div>
 
-        <Button type="submit" className="w-full h-12 text-base font-medium bg-[#208251] hover:bg-[#1e774a] transition-all duration-200">
+        <Button type="submit" className="w-full h-12 text-base font-medium bg-[#208251] hover:bg-[#1e774a] transition-all duration-200" disabled={loading}>
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Entrar
         </Button>
 

@@ -28,21 +28,7 @@ export interface CategoryInput {
   name: string
 }
 
-export interface Transaction {
-  id: string
-  user_id: string
-  name: string
-  description: string | null
-  category_output_id: number | null
-  category_input_id: number | null
-  type: 'income' | 'expense'
-  amount: number
-  created_at: string
-  updated_at: string
-  // Relations
-  category_output?: CategoryOutput
-  category_input?: CategoryInput
-}
+// Transaction interface moved to transactionService.ts
 
 export interface Goal {
   id: string

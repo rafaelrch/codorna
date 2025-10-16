@@ -5,10 +5,13 @@ import {
   List, 
   Target,
   User, 
-  LogOut
+  LogOut,
+  Crown,
+  Clock
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 import {
   Sidebar,
@@ -54,6 +57,21 @@ export function AppSidebar() {
     return location.pathname.startsWith(path);
   };
 
+  // Determinar status do usuário (Trial ou Pro)
+  const getUserStatus = () => {
+    // Lógica para determinar se é Pro ou Trial
+    // Por padrão, vamos considerar Pro se tiver um campo específico nos metadados
+    // ou se for um usuário com email específico, etc.
+    const isPro = user?.user_metadata?.subscription_type === 'pro' || 
+                  user?.user_metadata?.is_pro === true ||
+                  user?.email?.includes('@pro.') || // Exemplo: usuários com @pro.
+                  false; // Por padrão, todos são Trial
+    
+    return isPro ? 'Pro' : 'Trial';
+  };
+
+  const userStatus = getUserStatus();
+
   return (
     <Sidebar className="border-sidebar-border [&_[data-sidebar=sidebar]]:bg-[#F8F6F7]">
       <SidebarHeader className="p-4 pt-10">
@@ -91,9 +109,26 @@ export function AppSidebar() {
         <div className=" p-4 border-t border-sidebar-border">
           {state !== "collapsed" && user && (
             <div className="mb-7">
-              <p className="text-sm font-medium text-sidebar-accent-foreground">
-                {user.user_metadata?.first_name || user.email}
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-sidebar-accent-foreground">
+                  {user.user_metadata?.first_name || user.email}
+                </p>
+                <Badge 
+                  variant={userStatus === 'Pro' ? 'default' : 'secondary'}
+                  className={`text-xs px-2 py-1 ${
+                    userStatus === 'Pro' 
+                      ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0' 
+                      : 'bg-gray-100 text-gray-600 border-gray-200'
+                  }`}
+                >
+                  {userStatus === 'Pro' ? (
+                    <Crown className="h-3 w-3 mr-1" />
+                  ) : (
+                    <Clock className="h-3 w-3 mr-1" />
+                  )}
+                  {userStatus}
+                </Badge>
+              </div>
               <p className="text-xs text-sidebar-accent-foreground">{user.email}</p>
             </div>
           )}
