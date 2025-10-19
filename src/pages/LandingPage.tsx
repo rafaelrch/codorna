@@ -5,7 +5,6 @@ import Features from '@/components/landingPage/Features';
 import DashboardPreview from '@/components/landingPage/DashboardPreview';
 import Testimonials from '@/components/landingPage/Testimonals';
 import Pricing from '@/components/landingPage/Pricing';
-import FAQ from '@/components/landingPage/FAQ';
 import Footer from '@/components/landingPage/Footer';
 import { WaitlistPopup } from '@/components/WaitlistPopup';
 
@@ -22,7 +21,6 @@ const LandingPage = () => {
           <DashboardPreview />
           <Testimonials />
           <Pricing onOpenWaitlist={() => setIsWaitlistOpen(true)} />
-          <FAQ />
         </main>
         <Footer />
       </div>

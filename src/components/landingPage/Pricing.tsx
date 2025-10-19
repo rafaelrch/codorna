@@ -45,20 +45,16 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
           </h2>
         </div>
         
-        <div className="flex justify-center max-w-3xl mx-auto">
+        <div className="flex justify-center gap-8 max-w-4xl mx-auto">
           {plans.map((plan, index) => (
             <div 
               key={index}
-              className={`p-8 rounded-3xl flex flex-col h-[480px] w-full max-w-sm transition-all duration-300 relative ${
+              className={`p-8 rounded-3xl flex flex-col h-[480px] w-full max-w-sm transition-all duration-300 ${
                 plan.isPro 
                   ? "bg-[#208251] text-white" 
                   : "bg-white border border-gray-200 text-gray-900"
               }`}
             >
-              {/* Banner Beta */}
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-11 py-1 bg-[#208251] text-white text-sm rounded-full font-medium">
-                Beta
-              </div>
               <div className="flex flex-col h-full">
                 <div className="mb-6">
                   <h3 className={`text-lg font-regular mb-3 ${plan.isPro ? 'text-white' : 'text-gray-700'}`}>{plan.name}</h3>
