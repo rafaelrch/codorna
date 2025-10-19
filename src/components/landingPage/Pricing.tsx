@@ -45,11 +45,11 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
           </h2>
         </div>
         
-        <div className="flex justify-center gap-8 max-w-4xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-center gap-8 max-w-4xl mx-auto">
           {plans.map((plan, index) => (
             <div 
               key={index}
-              className={`p-8 rounded-3xl flex flex-col h-[480px] w-full max-w-sm transition-all duration-300 ${
+              className={`p-6 md:p-8 rounded-3xl flex flex-col h-auto md:h-[480px] w-full max-w-sm mx-auto md:mx-0 transition-all duration-300 ${
                 plan.isPro 
                   ? "bg-[#208251] text-white" 
                   : "bg-white border border-gray-200 text-gray-900"
@@ -59,14 +59,14 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
                 <div className="mb-6">
                   <h3 className={`text-lg font-regular mb-3 ${plan.isPro ? 'text-white' : 'text-gray-700'}`}>{plan.name}</h3>
                   <div className="mb-4">
-                    <div className={`text-5xl font-bold tracking-tighter ${plan.isPro ? 'text-white' : 'text-gray-900'}`}>{plan.price}</div>
+                    <div className={`text-3xl md:text-5xl font-bold tracking-tighter ${plan.isPro ? 'text-white' : 'text-gray-900'}`}>{plan.price}</div>
                     <div className={`text-sm mt-1 ${plan.isPro ? 'text-white/80' : 'text-gray-500'}`}>{plan.description}</div>
                   </div>
                   
                   <div className={`border-t mb-6 ${plan.isPro ? 'border-white/30' : 'border-gray-300'}`}></div>
                 </div>
                 
-                <div className="flex-1 space-y-4 mb-8">
+                <div className="flex-1 space-y-3 md:space-y-4 mb-6 md:mb-8">
                   {plan.features.map((feature, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <div className={`h-4 w-4 rounded-full flex items-center justify-center ${
@@ -83,7 +83,7 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
                 
                 {plan.isPro ? (
                   <Button 
-                    className="w-full rounded-full font-regular py-6 transition-all duration-200 bg-white text-[#208251] hover:bg-gray-100"
+                    className="w-full rounded-full font-regular py-4 md:py-6 transition-all duration-200 bg-white text-[#208251] hover:bg-gray-100"
                     asChild
                   >
                     <a href="https://pay.kirvano.com/0601b095-cab7-4769-9ea6-0b498f96a32b" target="_blank" rel="noopener noreferrer">
@@ -92,7 +92,7 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
                   </Button>
                 ) : (
                   <Button 
-                    className="w-full rounded-full font-regular py-6 transition-all duration-200 bg-[#208251] text-white hover:bg-[#208251]/90"
+                    className="w-full rounded-full font-regular py-4 md:py-6 transition-all duration-200 bg-[#208251] text-white hover:bg-[#208251]/90"
                     asChild
                   >
                     <Link to="/signup">{plan.buttonText}</Link>

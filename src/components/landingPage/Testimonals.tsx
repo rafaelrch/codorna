@@ -5,20 +5,17 @@ const Testimonials = () => {
     {
       quote: "Consegui economizar 30% do meu salário usando o Codorna. O controle de gastos é incrível e me ajudou a alcançar minhas metas financeiras.",
       author: "Maria Silva",
-      position: "Engenheira",
-      avatar: "bg-muted"
+      position: "Engenheira"
     },
     {
       quote: "Finalmente consegui organizar minhas finanças! O dashboard é muito intuitivo e os relatórios me ajudam a tomar melhores decisões.",
       author: "João Santos",
-      position: "Designer",
-      avatar: "bg-muted"
+      position: "Designer"
     },
     {
       quote: "A família toda usa o Codorna agora. Conseguimos controlar nossos gastos e economizar para a viagem dos sonhos.",
       author: "Ana Costa",
-      position: "Professora",
-      avatar: "bg-muted"
+      position: "Professora"
     }
   ];
   
@@ -49,12 +46,9 @@ const Testimonials = () => {
                 ))}
               </div>
               <p className="text-lg mb-8 text-foreground/90 italic">"{testimonial.quote}"</p>
-              <div className="flex items-center gap-4">
-                <div className={`h-12 w-12 rounded-full ${testimonial.avatar} bg-muted`}></div>
-                <div>
-                  <h4 className="font-medium text-foreground">{testimonial.author}</h4>
-                  <p className="text-sm text-muted-foreground">{testimonial.position}</p>
-                </div>
+              <div>
+                <h4 className="font-medium text-foreground">{testimonial.author}</h4>
+                <p className="text-sm text-muted-foreground">{testimonial.position}</p>
               </div>
             </div>
           ))}
