@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { AuthLayout } from '@/components/AuthLayout'
+import { userService } from '@/services/userService'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -15,6 +16,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const { signIn } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,8 +29,24 @@ export default function Login() {
     const { error } = await signIn(email, password)
     
     if (!error) {
-      // Redirecionar para o dashboard após login bem-sucedido
-      navigate('/dashboard')
+      // Verificar se o usuário tem acesso (trial válido ou PRO)
+      try {
+        const access = await userService.hasAccess()
+        
+        if (!access.hasAccess) {
+          // Se o trial expirou, redirecionar para página de trial expirado
+          navigate('/trial-expired')
+        } else {
+          // Redirecionar para a página de destino ou dashboard
+          const from = location.state?.from?.pathname || '/dashboard'
+          navigate(from, { replace: true })
+        }
+      } catch (error) {
+        console.error('Error checking access:', error)
+        // Em caso de erro, ainda redireciona para dashboard
+        // O ProtectedRoute vai verificar novamente
+        navigate('/dashboard')
+      }
     }
     
     setLoading(false)

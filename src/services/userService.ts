@@ -211,6 +211,37 @@ class UserService {
       currency: 'BRL'
     }).format(amount)
   }
+
+  // Verificar se o usuário tem acesso (PRO ou trial válido)
+  async hasAccess(): Promise<{ hasAccess: boolean; isPro: boolean; trialExpired: boolean }> {
+    const userData = await this.getCurrentUserData()
+    
+    if (!userData) {
+      return { hasAccess: false, isPro: false, trialExpired: true }
+    }
+
+    // Se o usuário é PRO, sempre tem acesso
+    if (userData.plan === 'pro' || userData.status === 'pro') {
+      return { hasAccess: true, isPro: true, trialExpired: false }
+    }
+
+    // Se é trial, verificar se expirou
+    if (userData.plan === 'trial' || userData.status === 'trial') {
+      const now = new Date()
+      const trialEndAt = new Date(userData.trial_end_at)
+      
+      const trialExpired = now > trialEndAt
+      
+      return {
+        hasAccess: !trialExpired,
+        isPro: false,
+        trialExpired
+      }
+    }
+
+    // Caso padrão: sem acesso
+    return { hasAccess: false, isPro: false, trialExpired: true }
+  }
 }
 
 export const userService = new UserService()

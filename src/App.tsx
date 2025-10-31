@@ -16,6 +16,7 @@ import SignupPro from "./pages/SignupPro";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import EmailConfirm from "./pages/EmailConfirm";
+import TrialExpired from "./pages/TrialExpired";
 import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
 
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/email-confirm" element={<EmailConfirm />} />
+            <Route path="/trial-expired" element={<TrialExpired />} />
             
             {/* Protected Routes */}
             <Route path="/dashboard" element={
