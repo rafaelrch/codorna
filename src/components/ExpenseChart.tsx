@@ -92,7 +92,7 @@ function CategoryLegend({ data, loading }: CategoryLegendProps) {
   }
 
   return (
-    <div className="space-y-2 max-h-80 overflow-y-auto">
+    <div className="space-y-2 max-h-80 overflow-y-auto pr-4 [scrollbar-color:theme(colors.gray.400)_transparent] [scrollbar-width:thin]">
       {data.map((entry) => (
         <div key={entry.name} className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
@@ -206,10 +206,10 @@ export function ExpenseChart({ startDate, endDate }: ExpenseChartProps) {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col lg:flex-row gap-6 ">
       {/* Chart Section */}
       <div className="flex-1">
-        <div className="h-80 flex items-center justify-center">
+        <div className="h-80 flex items-center justify-center ">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

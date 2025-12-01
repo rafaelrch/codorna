@@ -183,6 +183,12 @@ export default function Dashboard() {
           {/* Financial Cards - 3 cards com space-between */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FinancialCard
+              title="Saldo"
+              value={transactionService.formatCurrency(stats.balance)}
+              type="balance"
+              loading={loading}
+            />
+            <FinancialCard
               title="Entradas"
               value={transactionService.formatCurrency(stats.totalIncome)}
               type="income"
@@ -192,12 +198,6 @@ export default function Dashboard() {
               title="Saídas"
               value={transactionService.formatCurrency(stats.totalExpense)}
               type="expense"
-              loading={loading}
-            />
-            <FinancialCard
-              title="Saldo"
-              value={transactionService.formatCurrency(stats.balance)}
-              type="balance"
               loading={loading}
             />
           </div>
@@ -210,7 +210,7 @@ export default function Dashboard() {
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold">Gastos por categoria</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent >
                   <ExpenseChart 
                     startDate={getDateRange().startDate} 
                     endDate={getDateRange().endDate} 

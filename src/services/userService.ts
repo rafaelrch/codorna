@@ -214,32 +214,61 @@ class UserService {
 
   // Verificar se o usuário tem acesso (PRO ou trial válido)
   async hasAccess(): Promise<{ hasAccess: boolean; isPro: boolean; trialExpired: boolean }> {
-    const userData = await this.getCurrentUserData()
-    
-    if (!userData) {
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
       return { hasAccess: false, isPro: false, trialExpired: true }
     }
 
-    // Se o usuário é PRO, sempre tem acesso
-    if (userData.plan === 'pro' || userData.status === 'pro') {
-      return { hasAccess: true, isPro: true, trialExpired: false }
+    const metadataIsPro = user.user_metadata?.subscription_type === 'pro' || user.user_metadata?.is_pro === true
+
+    let userData: UserData | null = null
+    const { data: users2Data, error: users2Error } = await supabase
+      .from('users_2')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!users2Error && users2Data) {
+      userData = users2Data as UserData
     }
 
-    // Se é trial, verificar se expirou
-    if (userData.plan === 'trial' || userData.status === 'trial') {
-      const now = new Date()
-      const trialEndAt = new Date(userData.trial_end_at)
-      
-      const trialExpired = now > trialEndAt
-      
-      return {
-        hasAccess: !trialExpired,
-        isPro: false,
-        trialExpired
+    if (userData) {
+      if (userData.plan === 'pro' || userData.status === 'pro') {
+        return { hasAccess: true, isPro: true, trialExpired: false }
+      }
+
+      if (userData.plan === 'trial' || userData.status === 'trial') {
+        const now = new Date()
+        const trialEndAt = userData.trial_end_at ? new Date(userData.trial_end_at) : null
+        const trialExpired = trialEndAt ? now > trialEndAt : true
+
+        if (metadataIsPro) {
+          return { hasAccess: true, isPro: true, trialExpired: false }
+        }
+
+        return {
+          hasAccess: !trialExpired,
+          isPro: false,
+          trialExpired
+        }
       }
     }
 
-    // Caso padrão: sem acesso
+    if (metadataIsPro) {
+      return { hasAccess: true, isPro: true, trialExpired: false }
+    }
+
+    const { data: proData, error: proError } = await supabase
+      .from('users_pro')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .single()
+
+    if (!proError && proData) {
+      return { hasAccess: true, isPro: true, trialExpired: false }
+    }
+
     return { hasAccess: false, isPro: false, trialExpired: true }
   }
 }

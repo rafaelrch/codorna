@@ -7,7 +7,8 @@ import {
   User, 
   LogOut,
   Crown,
-  Clock
+  Clock,
+  History as HistoryIcon
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Lançamentos", href: "/transactions", icon: List },
   { name: "Metas", href: "/goals", icon: Target },
+  { name: "Histórico", href: "/history", icon: HistoryIcon },
   { name: "Minha conta", href: "/account", icon: User },
 ];
 

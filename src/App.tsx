@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Transactions from "./pages/Transactions";
 import Goals from "./pages/Goals";
 import Account from "./pages/Account";
+import History from "./pages/History";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import SignupPro from "./pages/SignupPro";
@@ -60,6 +61,11 @@ const App = () => (
             <Route path="/account" element={
               <ProtectedRoute>
                 <Layout><Account /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/history" element={
+              <ProtectedRoute>
+                <Layout><History /></Layout>
               </ProtectedRoute>
             } />
             

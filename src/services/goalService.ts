@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 export interface CreateGoalData {
   nome: string
@@ -142,7 +143,7 @@ class GoalService {
     }
   }
 
-  // Add amount to goal
+  // Add amount to goal (also registers deduction from balance)
   async addAmountToGoal(id: string, amount: number): Promise<Goal> {
     const { data: { user } } = await supabase.auth.getUser()
     
@@ -150,10 +151,9 @@ class GoalService {
       throw new Error('User not authenticated')
     }
 
-    // First get the current goal
     const { data: goal, error: fetchError } = await supabase
       .from('metas')
-      .select('valor_atual, valor')
+      .select('valor_atual, valor, nome')
       .eq('id', id)
       .eq('email', user.email)
       .single()
@@ -163,12 +163,34 @@ class GoalService {
       throw new Error('Failed to fetch goal')
     }
 
-    const newAmount = Math.min(goal.valor_atual + amount, goal.valor)
+    const clampedAmount = Math.max(amount, 0)
+    const targetRemaining = Math.max(goal.valor - goal.valor_atual, 0)
+    const amountToAdd = Math.min(clampedAmount, targetRemaining)
+    const newAmount = goal.valor_atual + amountToAdd
 
-    return this.updateGoal(id, { valor_atual: newAmount })
+    if (amountToAdd <= 0) {
+      return this.updateGoal(id, { valor_atual: goal.valor_atual })
+    }
+
+    const updatedGoal = await this.updateGoal(id, { valor_atual: newAmount })
+
+    try {
+      await this.recordGoalTransaction(user, amountToAdd, goal.nome, 'saida')
+    } catch (transactionError) {
+      console.error('Error registering goal deduction:', transactionError)
+      // Attempt to revert goal update to previous value
+      try {
+        await this.updateGoal(id, { valor_atual: goal.valor_atual })
+      } catch (rollbackError) {
+        console.error('Failed to rollback goal value after transaction error:', rollbackError)
+      }
+      throw new Error('Não foi possível registrar a movimentação financeira da meta.')
+    }
+
+    return updatedGoal
   }
 
-  // Remove amount from goal
+  // Remove amount from goal (credits balance back)
   async removeAmountFromGoal(id: string, amount: number): Promise<Goal> {
     const { data: { user } } = await supabase.auth.getUser()
     
@@ -176,10 +198,9 @@ class GoalService {
       throw new Error('User not authenticated')
     }
 
-    // First get the current goal
     const { data: goal, error: fetchError } = await supabase
       .from('metas')
-      .select('valor_atual')
+      .select('valor_atual, nome')
       .eq('id', id)
       .eq('email', user.email)
       .single()
@@ -189,9 +210,69 @@ class GoalService {
       throw new Error('Failed to fetch goal')
     }
 
-    const newAmount = Math.max(0, goal.valor_atual - amount)
+    const clampedAmount = Math.max(amount, 0)
+    const amountToRemove = Math.min(clampedAmount, goal.valor_atual)
+    const newAmount = goal.valor_atual - amountToRemove
 
-    return this.updateGoal(id, { valor_atual: newAmount })
+    const updatedGoal = await this.updateGoal(id, { valor_atual: newAmount })
+
+    if (amountToRemove > 0) {
+      try {
+        await this.recordGoalTransaction(user, amountToRemove, goal.nome, 'entrada')
+      } catch (transactionError) {
+        console.error('Error registering goal refund:', transactionError)
+        // Attempt to rollback goal value
+        try {
+          await this.updateGoal(id, { valor_atual: goal.valor_atual })
+        } catch (rollbackError) {
+          console.error('Failed to rollback goal after refund error:', rollbackError)
+        }
+        throw new Error('Não foi possível registrar a movimentação financeira da meta.')
+      }
+    }
+
+    return updatedGoal
+  }
+
+  private async recordGoalTransaction(user: SupabaseUser, amount: number, goalName: string, tipo: 'saida' | 'entrada') {
+    if (!user.email) {
+      throw new Error('Usuário sem e-mail associado')
+    }
+
+    let userPhone = ''
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('phone')
+      .eq('id', user.id)
+      .single()
+
+    if (!userError && userData) {
+      userPhone = userData.phone || ''
+    } else {
+      userPhone = user.user_metadata?.phone || user.user_metadata?.telefone || ''
+    }
+
+    const now = new Date().toISOString()
+    const descricao = tipo === 'saida'
+      ? `Reserva para meta: ${goalName}`
+      : `Resgate da meta: ${goalName}`
+
+    const { error } = await supabase
+      .from('financeiro_registros')
+      .insert({
+        data_hora: now,
+        responsavel: userPhone,
+        categoria: 'Metas',
+        tipo,
+        valor: amount,
+        descricao,
+        criado_em: now,
+        email: user.email
+      })
+
+    if (error) {
+      throw error
+    }
   }
 
   // Calculate goal progress percentage
