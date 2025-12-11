@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Logo from './Logo';
-import { Menu, X, CircleDot, LayoutDashboard, CreditCard } from 'lucide-react';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { Squares2X2Icon, CreditCardIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 import { cn } from '@/lib/utils';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Link } from 'react-router-dom';
@@ -41,7 +43,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
           className="md:hidden p-3 rounded-2xl text-muted-foreground hover:text-foreground"
           onClick={toggleMobileMenu}
         >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {mobileMenuOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
         </button>
         
         {/* Desktop navigation */}
@@ -56,7 +58,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                 )}
                 onClick={handleNavClick('features')}
               >
-                <CircleDot size={16} className="inline-block mr-1.5" /> Features
+                <SparklesIcon className="h-4 w-4 inline-block mr-1.5" /> Features
               </ToggleGroupItem>
               <ToggleGroupItem 
                 value="dashboard" 
@@ -66,7 +68,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                 )}
                 onClick={handleNavClick('dashboard')}
               >
-                <LayoutDashboard size={16} className="inline-block mr-1.5" /> Dashboard
+                <Squares2X2Icon className="h-4 w-4 inline-block mr-1.5" /> Dashboard
               </ToggleGroupItem>
               <ToggleGroupItem 
                 value="pricing" 
@@ -76,7 +78,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                 )}
                 onClick={handleNavClick('pricing')}
               >
-                <CreditCard size={16} className="inline-block mr-1.5" /> Planos
+                <CreditCardIcon className="h-4 w-4 inline-block mr-1.5" /> Planos
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
@@ -93,7 +95,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                 }`}
                 onClick={handleNavClick('features')}
               >
-                <CircleDot size={16} className="inline-block mr-1.5" /> Features
+                <SparklesIcon className="h-4 w-4 inline-block mr-1.5" /> Features
               </a>
               <a 
                 href="#dashboard" 
@@ -102,7 +104,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                 }`}
                 onClick={handleNavClick('dashboard')}
               >
-                <LayoutDashboard size={16} className="inline-block mr-1.5" /> Dashboard
+                <Squares2X2Icon className="h-4 w-4 inline-block mr-1.5" /> Dashboard
               </a>
               <a 
                 href="#pricing"
@@ -111,7 +113,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                 }`}
                 onClick={handleNavClick('pricing')}
               >
-                <CreditCard size={16} className="inline-block mr-1.5" /> Planos
+                <CreditCardIcon className="h-4 w-4 inline-block mr-1.5" /> Planos
               </a>
               
               {/* Mobile buttons */}
@@ -127,7 +129,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
                   className="w-full bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full"
                   asChild
                 >
-                  <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>Cadastrar</Link>
+                  <a href="https://wa.me/5571983486204?text=Ol%C3%A1%20Codorna!!" target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)}>Cadastrar</a>
                 </Button>
               </div>
             </div>
@@ -146,7 +148,7 @@ const Header = ({ onOpenWaitlist }: HeaderProps) => {
             className="bg-[#208251] text-white hover:bg-[#208251]/90 transition-ease-in-out duration-300 rounded-full"
             asChild
           >
-            <Link to="/signup">Cadastrar</Link>
+            <a href="https://wa.me/5571983486204?text=Ol%C3%A1%20Codorna!!" target="_blank" rel="noopener noreferrer">Cadastrar</a>
           </Button>
         </div>
       </header>

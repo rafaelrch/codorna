@@ -3,9 +3,6 @@ import { supabase } from '@/lib/supabase'
 export type HistoryEventType =
   | 'income'
   | 'expense'
-  | 'goal_created'
-  | 'goal_contribution'
-  | 'goal_withdraw'
 
 export interface HistoryEvent {
   id: string
@@ -25,31 +22,20 @@ class HistoryService {
       throw new Error('Usuário não autenticado')
     }
 
-    const [transactionsResult, goalsResult] = await Promise.all([
-      supabase
-        .from('financeiro_registros')
-        .select('id, tipo, valor, descricao, criado_em, categoria')
-        .eq('email', user.email)
-        .order('criado_em', { ascending: false }),
-      supabase
-        .from('metas')
-        .select('id, nome, created_at, valor')
-        .eq('email', user.email),
-    ])
+    const { data: transactionsData, error } = await supabase
+      .from('financeiro_registros')
+      .select('id, tipo, valor, descricao, criado_em, categoria')
+      .eq('email', user.email)
+      .neq('categoria', 'Metas') // Excluir transações relacionadas a metas
+      .order('criado_em', { ascending: false })
 
-    const transactionsEvents: HistoryEvent[] = (transactionsResult.data || []).map((transaction) => {
-      let type: HistoryEventType = transaction.tipo === 'entrada' ? 'income' : 'expense'
-      let title = transaction.tipo === 'entrada' ? 'Entrada de dinheiro' : 'Saída de dinheiro'
+    if (error) {
+      throw new Error(`Failed to fetch transactions: ${error.message}`)
+    }
 
-      if (transaction.categoria === 'Metas') {
-        if (transaction.tipo === 'saida') {
-          type = 'goal_contribution'
-          title = 'Aporte em meta'
-        } else {
-          type = 'goal_withdraw'
-          title = 'Resgate de meta'
-        }
-      }
+    const transactionsEvents: HistoryEvent[] = (transactionsData || []).map((transaction) => {
+      const type: HistoryEventType = transaction.tipo === 'entrada' ? 'income' : 'expense'
+      const title = transaction.tipo === 'entrada' ? 'Entrada de dinheiro' : 'Saída de dinheiro'
 
       return {
         id: `transaction-${transaction.id}`,
@@ -64,23 +50,7 @@ class HistoryService {
       }
     })
 
-    const goalEvents: HistoryEvent[] = (goalsResult.data || []).map((goal) => ({
-      id: `goal-${goal.id}`,
-      type: 'goal_created',
-      title: 'Meta criada',
-      description: `Meta "${goal.nome}" no valor de R$ ${Number(goal.valor).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`,
-      amount: Number(goal.valor),
-      created_at: goal.created_at,
-      metadata: {
-        goalId: goal.id,
-        goalName: goal.nome,
-      },
-    }))
-
-    return [...transactionsEvents, ...goalEvents].sort((a, b) => {
+    return transactionsEvents.sort((a, b) => {
       const dateA = new Date(a.created_at).getTime()
       const dateB = new Date(b.created_at).getTime()
       return dateB - dateA

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom'; // Comentado - não usado mais
 
 interface PricingProps {
   onOpenWaitlist: () => void;
@@ -9,30 +9,31 @@ interface PricingProps {
 const Pricing = ({ onOpenWaitlist }: PricingProps) => {
   const plans = [
     {
-      name: "Gratuito",
+      name: "Trial",
       price: "Grátis",
-      description: "Para sempre",
+      description: "Período de 7 dias grátis",
       features: [
-        "Acesso completo à plataforma",
-        "IA no WhatsApp",
-        "Todas as funcionalidades",
-        "Suporte da comunidade"
+        "Acesso a Inteligência Artificial no WhatsApp",
+        "Controle de gastos via WhatsApp por texto, áudio e imagem",
+        "Criação de Metas",
+        "Acesso a plataforma com Gráficos Interativos para melhor análise",
+        "Relatórios completos"
       ],
       buttonText: "Comece Agora",
-      isPro: false
+      isPro: false,
+      buttonLink: "https://wa.me/5571983486204?text=Ol%C3%A1%20Codorna!"
     },
     {
       name: "PRO",
       price: "R$ 19,00",
       description: "/mês",
       features: [
-        "Acesso completo à plataforma",
-        "IA no WhatsApp",
-        "Acesso antecipado a novas funcionalidades",
-        "Suporte prioritário"
+        "Tudo do trial ilimitado",
+        "Acesso antecipado a novidades"
       ],
       buttonText: "Assinar agora",
-      isPro: true
+      isPro: true,
+      buttonLink: "https://pay.kirvano.com/75a61fc9-724d-42dc-9a97-b147a99e425e"
     }
   ];
   
@@ -49,7 +50,7 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
           {plans.map((plan, index) => (
             <div 
               key={index}
-              className={`p-6 md:p-8 rounded-3xl flex flex-col h-auto md:h-[480px] w-full max-w-sm mx-auto md:mx-0 transition-all duration-300 ${
+              className={`p-6 md:p-8 rounded-3xl flex flex-col h-auto w-full max-w-sm mx-auto md:mx-0 transition-all duration-300 ${
                 plan.isPro 
                   ? "bg-[#208251] text-white" 
                   : "bg-white border border-gray-200 text-gray-900"
@@ -81,23 +82,18 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
                   ))}
                 </div>
                 
-                {plan.isPro ? (
-                  <Button 
-                    className="w-full rounded-full font-regular py-4 md:py-6 transition-all duration-200 bg-white text-[#208251] hover:bg-gray-100"
-                    asChild
-                  >
-                    <a href="https://pay.kirvano.com/0601b095-cab7-4769-9ea6-0b498f96a32b" target="_blank" rel="noopener noreferrer">
-                      {plan.buttonText}
-                    </a>
-                  </Button>
-                ) : (
-                  <Button 
-                    className="w-full rounded-full font-regular py-4 md:py-6 transition-all duration-200 bg-[#208251] text-white hover:bg-[#208251]/90"
-                    asChild
-                  >
-                    <Link to="/signup">{plan.buttonText}</Link>
-                  </Button>
-                )}
+                <Button 
+                  className={`w-full rounded-full font-regular py-4 md:py-6 transition-all duration-200 ${
+                    plan.isPro 
+                      ? "bg-white text-[#208251] hover:bg-gray-100" 
+                      : "bg-[#208251] text-white hover:bg-[#208251]/90"
+                  }`}
+                  asChild
+                >
+                  <a href={plan.buttonLink} target="_blank" rel="noopener noreferrer">
+                    {plan.buttonText}
+                  </a>
+                </Button>
               </div>
             </div>
           ))}

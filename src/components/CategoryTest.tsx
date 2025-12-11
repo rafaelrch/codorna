@@ -10,14 +10,11 @@ export default function CategoryTest() {
     try {
       setLoading(true);
       setError(null);
-      console.log('Teste: Carregando categorias...');
       
       const data = await transactionService.getAllCategories();
-      console.log('Teste: Categorias carregadas:', data);
       
       setCategories(data);
     } catch (err: any) {
-      console.error('Teste: Erro ao carregar categorias:', err);
       setError(err.message || 'Erro desconhecido');
     } finally {
       setLoading(false);

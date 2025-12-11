@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/hooks/use-toast'
 
@@ -35,13 +36,13 @@ export default function EmailConfirm() {
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             {status === 'loading' && (
-              <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+              <ArrowPathIcon className="h-12 w-12 animate-spin text-blue-600" />
             )}
             {status === 'success' && (
-              <CheckCircle className="h-12 w-12 text-green-600" />
+              <CheckCircleIcon className="h-12 w-12 text-green-600" />
             )}
             {status === 'error' && (
-              <XCircle className="h-12 w-12 text-red-600" />
+              <XCircleIcon className="h-12 w-12 text-red-600" />
             )}
           </div>
           

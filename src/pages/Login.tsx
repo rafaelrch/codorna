@@ -4,8 +4,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import { AuthLayout } from '@/components/AuthLayout'
 import { userService } from '@/services/userService'
 
@@ -26,35 +26,34 @@ export default function Login() {
     }
 
     setLoading(true)
+    
     const { error } = await signIn(email, password)
     
     if (!error) {
-      // Verificar se o usuário tem acesso (trial válido ou PRO)
+      // Nova checagem de acesso considerando tabelas users_trial e usuario_compra
       try {
-        const access = await userService.hasAccess()
-        
-        if (!access.hasAccess) {
-          // Se o trial expirou, redirecionar para página de trial expirado
-          navigate('/trial-expired')
+        const accessResult = await userService.evaluateAccessStatus()
+
+        if (accessResult.userTotalId) {
+          localStorage.setItem('user_total_id', accessResult.userTotalId)
+        }
+
+        if (accessResult.redirectTo) {
+          navigate(accessResult.redirectTo)
         } else {
-          // Redirecionar para a página de destino ou dashboard
           const from = location.state?.from?.pathname || '/dashboard'
           navigate(from, { replace: true })
         }
-      } catch (error) {
-        console.error('Error checking access:', error)
-        // Em caso de erro, ainda redireciona para dashboard
-        // O ProtectedRoute vai verificar novamente
+      } catch (error: any) {
         navigate('/dashboard')
       }
     }
-    
     setLoading(false)
   }
 
   return (
     <AuthLayout
-      title="Bem-vindo de volta ao Codorna! 👋"
+      title="Bem-vindo ao Codorna! 👋"
       subtitle=""
       description="Gerencie suas finanças de forma simples e eficiente."
       backgroundImage="/tenis.jpg"
@@ -94,34 +93,25 @@ export default function Login() {
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? (
-                <EyeOff className="h-4 w-4" />
+                <EyeSlashIcon className="h-4 w-4" />
               ) : (
-                <Eye className="h-4 w-4" />
+                <EyeIcon className="h-4 w-4" />
               )}
             </Button>
           </div>
         </div>
 
         <Button type="submit" className="w-full h-12 text-base font-medium bg-[#208251] hover:bg-[#1e774a] transition-all duration-200" disabled={loading}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {loading && <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />}
           Entrar
         </Button>
 
         <div className="text-center">
-          <Link 
-            to="/forgot-password" 
-            className="text-sm text-slate-600 hover:text-blue-600 font-medium"
-          >
-            Esqueceu sua senha?
-          </Link>
-        </div>
-
-        <div className="text-center">
           <span className="text-sm text-slate-600">
             Não tem uma conta?{' '}
-            <Link to="/signup" className="text-blue-600 hover:underline font-medium">
+            <a href="https://wa.me/5571983486204?text=Ol%C3%A1%20Codorna!!" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">
               Cadastre-se
-            </Link>
+            </a>
           </span>
         </div>
       </form>

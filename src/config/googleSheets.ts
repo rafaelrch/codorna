@@ -18,7 +18,6 @@ export const sendToGoogleSheets = async (data: { nome: string; email: string; te
     
     return { success: true, response }
   } catch (error) {
-    console.error('Erro ao enviar para Google Sheets:', error)
     return { success: false, error }
   }
 }

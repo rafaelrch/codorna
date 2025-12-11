@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Loader2 } from 'lucide-react'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import { sendToGoogleSheets } from '@/config/googleSheets'
 
 interface WaitlistPopupProps {
@@ -69,7 +69,6 @@ export const WaitlistPopup = ({ isOpen, onClose }: WaitlistPopupProps) => {
       }, 2000)
       
     } catch (error) {
-      console.error('Erro ao enviar para Google Sheets:', error)
       alert('Erro ao enviar dados. Tente novamente.')
     } finally {
       setLoading(false)
@@ -150,7 +149,7 @@ export const WaitlistPopup = ({ isOpen, onClose }: WaitlistPopupProps) => {
               className="w-full h-12 text-base font-regular bg-[#208251] hover:bg-[#1e774a] transition-all duration-200"
               disabled={loading}
             >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {loading && <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />}
               Entrar na fila de espera
             </Button>
 

@@ -178,7 +178,6 @@ export function ExpenseChart({ startDate, endDate }: ExpenseChartProps) {
 
         setData(sortedData);
       } catch (error) {
-        console.error('Erro ao carregar dados do gráfico:', error);
         toast({
           title: "Erro",
           description: "Não foi possível carregar os dados do gráfico.",

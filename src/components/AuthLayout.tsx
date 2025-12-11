@@ -17,11 +17,11 @@ export function AuthLayout({ children, title, subtitle, description, backgroundI
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Background Image */}
         {backgroundImage && (
-          <div className="absolute inset-0">
+          <div className="absolute inset-5">
             <img 
               src={backgroundImage} 
               alt={backgroundImageAlt || "Imagem de fundo"} 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-2xl"
             />
           </div>
         )}

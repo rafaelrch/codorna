@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Loader } from 'lucide-react';
+// Removed unused import
 import { Link } from 'react-router-dom';
+import { DottedSurface } from '@/components/ui/dotted-surface';
 
 interface HeroSectionProps {
   onOpenWaitlist: () => void;
@@ -18,10 +19,11 @@ const HeroSection = ({ onOpenWaitlist }: HeroSectionProps) => {
   }, []);
   
   return (
-    <section className="relative w-full py-12 md:py-20 px-6 md:px-12 overflow-hidden bg-background">
-      {/* Cosmic particle effect (background dots) */}
-      <div className="absolute inset-0 cosmic-grid opacity-30"></div>
-    
+    <section className="relative w-full py-12 md:py-20 px-6 md:px-12 overflow-hidden">
+      {/* Dotted Surface Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <DottedSurface className="absolute inset-0" />
+      </div>
       
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[600px]">
@@ -42,7 +44,7 @@ const HeroSection = ({ onOpenWaitlist }: HeroSectionProps) => {
                 className="bg-[#208251] rounded-full text-white hover:bg-[#208251]/90 text-base h-12 px-8 transition-ease-in-out duration-300 min-h-[48px]"
                 asChild
               >
-                <Link to="/signup">Começar Gratuitamente</Link>
+                <a href="https://wa.me/5571983486204?text=Ol%C3%A1%20Codorna!!" target="_blank" rel="noopener noreferrer">Começar Gratuitamente</a>
               </Button>
             </div>
           </div>

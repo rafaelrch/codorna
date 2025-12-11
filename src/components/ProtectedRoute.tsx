@@ -1,6 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { Navigate, useLocation } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { ArrowPathIcon } from '@heroicons/react/24/solid'
 import { useEffect, useState } from 'react'
 import { userService } from '@/services/userService'
 
@@ -22,10 +22,16 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
       }
 
       try {
-        const access = await userService.hasAccess()
-        setHasAccess(access.hasAccess)
+        const accessResult = await userService.evaluateAccessStatus()
+        
+        // Se há um redirecionamento necessário, significa que não tem acesso
+        if (accessResult.redirectTo) {
+          setHasAccess(false)
+        } else {
+          setHasAccess(true)
+        }
       } catch (error) {
-        console.error('Error checking access:', error)
+        // Em caso de erro, negar acesso por segurança
         setHasAccess(false)
       } finally {
         setAccessLoading(false)
@@ -43,7 +49,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   if (loading || accessLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <ArrowPathIcon className="h-8 w-8 animate-spin" />
       </div>
     )
   }

@@ -11,9 +11,8 @@ import Transactions from "./pages/Transactions";
 import Goals from "./pages/Goals";
 import Account from "./pages/Account";
 import History from "./pages/History";
+import IA from "./pages/IA";
 import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import SignupPro from "./pages/SignupPro";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import EmailConfirm from "./pages/EmailConfirm";
@@ -35,8 +34,6 @@ const App = () => (
             <Route path="/" element={<LandingPage />} />
             <Route path="/pricing" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/signup-pro" element={<SignupPro />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/email-confirm" element={<EmailConfirm />} />
@@ -66,6 +63,11 @@ const App = () => (
             <Route path="/history" element={
               <ProtectedRoute>
                 <Layout><History /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/ia" element={
+              <ProtectedRoute>
+                <Layout><IA /></Layout>
               </ProtectedRoute>
             } />
             

@@ -8,7 +8,7 @@ import GoalCard from '@/components/GoalCard'
 import { goalService } from '@/services/goalService'
 import { useToast } from '@/hooks/use-toast'
 import type { Goal } from '@/services/goalService'
-import { Target, TrendingUp, Calendar, DollarSign, Trophy, ChevronDown, ChevronUp } from 'lucide-react'
+import { AdjustmentsHorizontalIcon, ArrowTrendingUpIcon, CalendarIcon, CurrencyDollarIcon, TrophyIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 
 export default function Goals() {
   const [goals, setGoals] = useState<Goal[]>([])
@@ -20,10 +20,8 @@ export default function Goals() {
     try {
       setLoading(true)
       const data = await goalService.getGoals()
-      console.log('Goals loaded in page:', data)
       setGoals(data)
     } catch (error) {
-      console.error('Erro ao carregar metas:', error)
       toast({
         title: "Erro",
         description: "Não foi possível carregar as metas.",
@@ -87,16 +85,16 @@ export default function Goals() {
         <AddGoalDialog onAddGoal={handleGoalUpdate} />
       </PageHeader>
       
-      <div className="px-6 py-6 ">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="px-4 sm:px-6 py-4 sm:py-6">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
 
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Metas</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
+            <AdjustmentsHorizontalIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalGoals}</div>
@@ -109,7 +107,7 @@ export default function Goals() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Progresso Geral</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <ArrowTrendingUpIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{overallProgress.toFixed(1)}%</div>
@@ -122,7 +120,7 @@ export default function Goals() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Valor Economizado</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CurrencyDollarIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -137,7 +135,7 @@ export default function Goals() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Metas Concluídas</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
+            <TrophyIcon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{completedGoals.length}</div>
@@ -158,38 +156,38 @@ export default function Goals() {
         </div>
         
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {Array.from({ length: 6 }).map((_, index) => (
               <Card key={index}>
                 <CardHeader>
-                  <Skeleton className="h-6 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-5 sm:h-6 w-3/4" />
+                  <Skeleton className="h-3 sm:h-4 w-1/2" />
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4">
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-3 sm:h-4 w-full" />
                     <Skeleton className="h-2 w-full" />
                     <div className="flex justify-between">
-                      <Skeleton className="h-4 w-20" />
-                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-3 sm:h-4 w-16 sm:w-20" />
+                      <Skeleton className="h-3 sm:h-4 w-16 sm:w-20" />
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Skeleton className="h-8 flex-1" />
-                    <Skeleton className="h-8 flex-1" />
+                    <Skeleton className="h-7 sm:h-8 flex-1" />
+                    <Skeleton className="h-7 sm:h-8 flex-1" />
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : activeGoals.length === 0 ? (
-          <Card className="text-center py-12">
+          <Card className="text-center py-8 sm:py-12">
             <CardHeader>
-              <Target className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <CardTitle>
+              <AdjustmentsHorizontalIcon className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-3 sm:mb-4" />
+              <CardTitle className="text-lg sm:text-xl">
                 {goals.length === 0 ? 'Nenhuma meta encontrada' : 'Todas as metas foram concluídas!'}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-sm sm:text-base">
                 {goals.length === 0 
                   ? 'Crie sua primeira meta financeira para começar a economizar'
                   : 'Parabéns! Crie novas metas para continuar crescendo financeiramente'
@@ -201,7 +199,7 @@ export default function Goals() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {activeGoals.map((goal) => (
               <GoalCard
                 key={goal.id}
@@ -222,17 +220,17 @@ export default function Goals() {
             onClick={() => setShowCompletedGoals(!showCompletedGoals)}
             className="flex items-center gap-2 text-lg font-semibold p-0 h-auto hover:bg-transparent"
           >
-            <Trophy className="h-5 w-5 text-green-600" />
+            <TrophyIcon className="h-5 w-5 text-green-600" />
             Metas Concluídas ({completedGoals.length})
             {showCompletedGoals ? (
-              <ChevronUp className="h-4 w-4" />
+              <ChevronUpIcon className="h-4 w-4" />
             ) : (
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDownIcon className="h-4 w-4" />
             )}
           </Button>
           
           {showCompletedGoals && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {completedGoals.map((goal) => (
                 <GoalCard
                   key={goal.id}

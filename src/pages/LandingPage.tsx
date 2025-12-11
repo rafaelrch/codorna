@@ -13,7 +13,7 @@ const LandingPage = () => {
 
   return (
     <>
-      <div className={`min-h-screen bg-background transition-all duration-300 ${isWaitlistOpen ? 'waitlist-blur' : ''}`}>
+      <div className={`min-h-screen transition-all duration-300 ${isWaitlistOpen ? 'waitlist-blur' : ''}`}>
         <Header onOpenWaitlist={() => setIsWaitlistOpen(true)} />
         <main>
           <HeroSection onOpenWaitlist={() => setIsWaitlistOpen(true)} />

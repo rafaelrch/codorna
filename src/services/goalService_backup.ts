@@ -42,7 +42,6 @@ class GoalService {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching goals:', error)
       throw new Error(`Failed to fetch goals: ${error.message}`)
     }
 
@@ -69,7 +68,6 @@ class GoalService {
       prazo: goal.prazo || null
     }
 
-    console.log('Tentando criar meta com dados:', goalData)
 
     const { data, error } = await supabase
       .from('metas')
@@ -78,8 +76,6 @@ class GoalService {
       .single()
 
     if (error) {
-      console.error('Error creating goal:', error)
-      console.error('Goal data that failed:', goalData)
       throw new Error(`Failed to create goal: ${error.message}`)
     }
 
@@ -117,7 +113,6 @@ class GoalService {
       .single()
 
     if (error) {
-      console.error('Error updating goal:', error)
       throw new Error(`Failed to update goal: ${error.message}`)
     }
 
@@ -139,7 +134,6 @@ class GoalService {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting goal:', error)
       throw new Error('Failed to delete goal')
     }
   }
@@ -161,7 +155,6 @@ class GoalService {
       .single()
 
     if (fetchError) {
-      console.error('Error fetching goal:', fetchError)
       throw new Error('Failed to fetch goal')
     }
 
@@ -187,7 +180,6 @@ class GoalService {
       .single()
 
     if (fetchError) {
-      console.error('Error fetching goal:', fetchError)
       throw new Error('Failed to fetch goal')
     }
 

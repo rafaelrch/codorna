@@ -50,11 +50,6 @@
     --codorna-chart-mercado: #7b1fa2;      /* Roxo - 15% */
     --codorna-chart-casa: #e91e63;         /* Rosa - 15% */
     
-    /* === SOMBRAS === */
-    --codorna-shadow-small: none;
-    --codorna-shadow-medium: none;
-    --codorna-shadow-large: none;
-    --codorna-shadow-card: none;
     
     /* === TIPOGRAFIA === */
     --codorna-font-family: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -180,14 +175,14 @@
     --radius: 0.5rem; /* 8px */
 
     /* Sidebar */
-    --sidebar-background: 210 17% 95%; /* #f1f3f4 */
-    --sidebar-foreground: 210 0% 40%; /* #202124 */
-    --sidebar-primary: 210 11% 13%; /* #202124 */
-    --sidebar-primary-foreground: 0 0% 100%; /* #ffffff */
-    --sidebar-accent: 210 0% 90%; /* #f8f9fa */
-    --sidebar-accent-foreground: 210 0% 0%; /* #202124 */
-    --sidebar-border: 210 14% 89%; /* #dadce0 */
-    --sidebar-ring: 0 0% 0%; /* #000000 */
+    --sidebar-background: 0 0% 98%; /* #f1f3f4 */
+    --sidebar-foreground: 240 5.3% 26.1%; /* #202124 */
+    --sidebar-primary: 240 5.9% 10%; /* #202124 */
+    --sidebar-primary-foreground: 0 0% 98%; /* #ffffff */
+    --sidebar-accent: 240 4.8% 95.9%; /* #f8f9fa */
+    --sidebar-accent-foreground: 240 5.9% 10%; /* #202124 */
+    --sidebar-border: 220 13% 91%; /* #dadce0 */
+    --sidebar-ring: 217.2 91.2% 59.8%; /* #000000 */
 
     /* Chart colors */
     --chart-1: 0 0% 0%; /* #000000 - Aluguel */
@@ -218,14 +213,14 @@
     --border: 210 11% 20%;
     --input: 210 11% 20%;
     --ring: 0 0% 0%;
-    --sidebar-background: 210 11% 13%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 210 11% 13%;
-    --sidebar-accent: 210 11% 15%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 210 11% 20%;
-    --sidebar-ring: 0 0% 0%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -279,7 +274,7 @@
 @layer base {
   * {
     @apply border-border;
-    box-shadow: none !important;
+    /* box-shadow removido para permitir sombras manuais */
   }
 
   body {
@@ -372,5 +367,45 @@
     backdrop-filter: blur(4px);
     z-index: 40;
     transition: all 0.3s ease-in-out;
+  }
+
+  /* Animação para transações */
+  @keyframes transaction-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .animate-transaction-fade-in {
+    animation: transaction-fade-in 0.6s ease-out forwards;
+  }
+
+  /* Estilização customizada do scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background-color: #9ca3af;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
   }
 }

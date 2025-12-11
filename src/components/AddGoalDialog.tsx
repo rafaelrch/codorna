@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Plus } from 'lucide-react'
+import { DatePicker } from '@/components/ui/date-picker'
+import { PlusIcon } from '@heroicons/react/24/outline'
 import { useToast } from '@/hooks/use-toast'
 import { goalService } from '@/services/goalService'
 
@@ -15,6 +16,7 @@ interface AddGoalDialogProps {
 
 export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
   const [open, setOpen] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const { toast } = useToast()
   const form = useForm({
     defaultValues: {
@@ -45,14 +47,22 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
     }
 
     try {
-      const goalData = {
-        nome: data.nome.trim(),
-        valor: parseFloat(data.valor),
-        valor_atual: data.valor_atual ? parseFloat(data.valor_atual) : 0,
-        prazo: data.prazo || undefined,
+      // Converter Date para string DD/MM/YYYY se houver data selecionada
+      let prazoString: string | undefined = undefined;
+      if (selectedDate) {
+        const day = String(selectedDate.getDate()).padStart(2, '0');
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const year = selectedDate.getFullYear();
+        prazoString = `${day}/${month}/${year}`;
       }
 
-      console.log('Creating goal with data:', goalData)
+      const goalData = {
+        nomeMeta: data.nome.trim(),  // nomeMeta na tabela
+        valor: parseFloat(data.valor),
+        valor_atual: data.valor_atual ? parseFloat(data.valor_atual) : 0,
+        prazo: prazoString || undefined,
+      }
+
       await goalService.createGoal(goalData)
       
       toast({
@@ -66,11 +76,11 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
         valor_atual: '',
         prazo: '',
       })
+      setSelectedDate(undefined)
       
       setOpen(false)
       onAddGoal()
     } catch (error: any) {
-      console.error('Error creating goal:', error)
       toast({
         title: "Erro",
         description: error.message || "Não foi possível criar a meta.",
@@ -82,17 +92,17 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-black text-primary-foreground w-full sm:w-auto">
-          <Plus className="h-4 w-4 mr-2" />
+        <Button className="bg-[#1f8150] text-white hover:bg-[#1a6b42] w-full sm:w-auto">
+          <PlusIcon className="h-4 w-4 mr-2" />
           Nova Meta
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-w-[90vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nova Meta</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">Nova Meta</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
             <FormField
               control={form.control}
               name="nome"
@@ -152,18 +162,33 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
                 <FormItem>
                   <FormLabel>Data Limite (opcional)</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <DatePicker
+                      date={selectedDate}
+                      onSelect={(date) => {
+                        setSelectedDate(date);
+                        // Manter compatibilidade com o form
+                        if (date) {
+                          const day = String(date.getDate()).padStart(2, '0');
+                          const month = String(date.getMonth() + 1).padStart(2, '0');
+                          const year = date.getFullYear();
+                          field.onChange(`${year}-${month}-${day}`);
+                        } else {
+                          field.onChange('');
+                        }
+                      }}
+                      placeholder="Selecione uma data"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
                 Cancelar
               </Button>
-              <Button type="submit" className='bg-black hover:bg-black/90'>Criar Meta</Button>
+              <Button type="submit" className='bg-black hover:bg-black/90 w-full sm:w-auto'>Criar Meta</Button>
             </div>
           </form>
         </Form>

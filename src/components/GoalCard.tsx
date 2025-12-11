@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/ui/date-picker'
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -20,15 +21,15 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
 import { 
-  Target, 
-  Plus, 
-  Minus, 
-  MoreVertical, 
-  Edit, 
-  Trash2, 
-  Calendar,
-  TrendingUp 
-} from 'lucide-react'
+  AdjustmentsHorizontalIcon,
+  PlusIcon, 
+  MinusIcon, 
+  EllipsisVerticalIcon, 
+  PencilIcon, 
+  TrashIcon, 
+  CalendarIcon,
+  ArrowTrendingUpIcon 
+} from '@heroicons/react/24/outline'
 import { useToast } from '@/hooks/use-toast'
 import { goalService } from '@/services/goalService'
 import type { Goal } from '@/services/goalService'
@@ -45,11 +46,42 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [amount, setAmount] = useState('')
+  // Helper to convert DD/MM/YYYY to YYYY-MM-DD for date input
+  const convertToDateInput = (dateStr: string): string => {
+    if (!dateStr) return '';
+    const ddmmyyyyMatch = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (ddmmyyyyMatch) {
+      const [, day, month, year] = ddmmyyyyMatch;
+      return `${year}-${month}-${day}`;
+    }
+    return dateStr; // Return as is if not in DD/MM/YYYY format
+  };
+
+  // Helper para converter DD/MM/YYYY para Date
+  const parseDateFromString = (dateStr: string): Date | undefined => {
+    if (!dateStr || dateStr.trim() === '' || dateStr.toUpperCase() === 'EMPTY') return undefined;
+    const ddmmyyyyMatch = dateStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (ddmmyyyyMatch) {
+      const [, day, month, year] = ddmmyyyyMatch;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    const yyyymmddMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (yyyymmddMatch) {
+      const [, year, month, day] = yyyymmddMatch;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    return undefined;
+  };
+
   const [editData, setEditData] = useState({
-    nome: goal.nome,
+    nome: goal.nomeMeta,  // nomeMeta na tabela, mas mantemos "nome" no estado para compatibilidade
     valor: goal.valor.toString(),
-    prazo: goal.prazo || ''
+    prazo: goal.prazo ? convertToDateInput(goal.prazo) : ''  // Converter DD/MM/YYYY para YYYY-MM-DD para o input
   })
+  
+  const [editDate, setEditDate] = useState<Date | undefined>(
+    goal.prazo ? parseDateFromString(goal.prazo) : undefined
+  )
   const { toast } = useToast()
 
   const progress = goalService.calculateProgress(goal.valor_atual, goal.valor)
@@ -134,7 +166,7 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
 
     try {
       await goalService.updateGoal(goal.id, {
-        nome: editData.nome.trim(),
+        nomeMeta: editData.nome.trim(),  // nomeMeta na tabela
         valor: parseFloat(editData.valor),
         prazo: editData.prazo || undefined,
       })
@@ -178,16 +210,16 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                {goal.nome}
+                <AdjustmentsHorizontalIcon className="h-5 w-5" />
+                {goal.nomeMeta}
               </CardTitle>
-              {goal.prazo && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Calendar className="h-4 w-4" />
-                  {goalService.formatDateForDisplay(goal.prazo)}
+              {goal.prazo && goal.prazo.trim() !== '' && goal.prazo.toUpperCase() !== 'EMPTY' && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CalendarIcon className="h-4 w-4" />
+                  <span className="font-medium">{goalService.formatDateForDisplay(goal.prazo)}</span>
                   {daysRemaining !== null && (
-                    <Badge variant={isOverdue ? "destructive" : "secondary"} className="ml-2">
-                      {isOverdue ? "Vencida" : `${daysRemaining} dias`}
+                    <Badge variant={isOverdue ? "destructive" : "secondary"} className="ml-1">
+                      {isOverdue ? "Vencida" : daysRemaining > 0 ? `${daysRemaining} ${daysRemaining === 1 ? 'dia' : 'dias'}` : 'Hoje'}
                     </Badge>
                   )}
                 </div>
@@ -196,19 +228,19 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <MoreVertical className="h-4 w-4" />
+                  <EllipsisVerticalIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setEditOpen(true)}>
-                  <Edit className="h-4 w-4 mr-2" />
+                  <PencilIcon className="h-4 w-4 mr-2" />
                   Editar
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={() => setDeleteOpen(true)}
                   className="text-destructive"
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <TrashIcon className="h-4 w-4 mr-2" />
                   Excluir
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -230,7 +262,7 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
 
           {isCompleted && (
             <Badge className="w-full justify-center bg-green-100 text-green-800 hover:bg-green-100">
-              <TrendingUp className="h-4 w-4 mr-1" />
+              <ArrowTrendingUpIcon className="h-4 w-4 mr-1" />
               Meta Concluída!
             </Badge>
           )}
@@ -242,7 +274,7 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
               onClick={() => setAddAmountOpen(true)}
               className="flex-1"
             >
-              <Plus className="h-4 w-4 mr-1" />
+              <PlusIcon className="h-4 w-4 mr-1" />
               Adicionar
             </Button>
             <Button 
@@ -251,7 +283,7 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
               onClick={() => setRemoveAmountOpen(true)}
               className="flex-1"
             >
-              <Minus className="h-4 w-4 mr-1" />
+              <MinusIcon className="h-4 w-4 mr-1" />
               Remover
             </Button>
           </div>
@@ -341,11 +373,20 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
             </div>
             <div>
               <Label htmlFor="edit-deadline">Data Limite</Label>
-              <Input
-                id="edit-deadline"
-                type="date"
-                value={editData.prazo}
-                onChange={(e) => setEditData({ ...editData, prazo: e.target.value })}
+              <DatePicker
+                date={editDate}
+                onSelect={(date) => {
+                  setEditDate(date);
+                  if (date) {
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    setEditData({ ...editData, prazo: `${year}-${month}-${day}` });
+                  } else {
+                    setEditData({ ...editData, prazo: '' });
+                  }
+                }}
+                placeholder="Selecione uma data"
               />
             </div>
           </div>
@@ -365,7 +406,7 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
             <DialogTitle>Excluir Meta</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Tem certeza que deseja excluir a meta "{goal.nome}"? Esta ação não pode ser desfeita.
+            Tem certeza que deseja excluir a meta "{goal.nomeMeta}"? Esta ação não pode ser desfeita.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteOpen(false)}>

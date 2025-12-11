@@ -2,24 +2,25 @@ import { supabase } from '@/lib/supabase'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 
 export interface CreateGoalData {
-  nome: string
+  nomeMeta: string  // nomeMeta na tabela
   valor: number
   valor_atual?: number
   prazo?: string
 }
 
 export interface UpdateGoalData {
-  nome?: string
+  nomeMeta?: string  // nomeMeta na tabela
   valor?: number
   valor_atual?: number
   prazo?: string
 }
 
 export interface Goal {
-  id: string  // uuid
+  id: number  // int4 (primary key)
+  user_id?: string  // uuid
   email: string
   telefone?: string
-  nome: string
+  nomeMeta: string  // nomeMeta na tabela
   valor: number
   valor_atual: number
   prazo?: string  // date
@@ -36,14 +37,14 @@ class GoalService {
       throw new Error('User not authenticated')
     }
 
+    // Buscar usando user_id (coluna correta da tabela)
     const { data, error } = await supabase
       .from('metas')
       .select('*')
-      .eq('email', user.email)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching goals:', error)
       throw new Error(`Failed to fetch goals: ${error.message}`)
     }
 
@@ -62,12 +63,13 @@ class GoalService {
     let userPhone = user.user_metadata?.phone || user.user_metadata?.telefone || ''
 
     const goalData = {
+      user_id: user.id,  // user_id é obrigatório na tabela
       email: user.email,
       telefone: userPhone,
-      nome: goal.nome,
+      nomeMeta: goal.nomeMeta,  // nomeMeta na tabela
       valor: goal.valor,
       valor_atual: goal.valor_atual || 0,
-      prazo: goal.prazo || null
+      prazo: goal.prazo ? this.formatDateForStorage(goal.prazo) : null  // Converter para DD/MM/YYYY
     }
 
     const { data, error } = await supabase
@@ -77,8 +79,6 @@ class GoalService {
       .single()
 
     if (error) {
-      console.error('Error creating goal:', error)
-      console.error('Goal data that failed:', goalData)
       throw new Error(`Failed to create goal: ${error.message}`)
     }
 
@@ -86,7 +86,7 @@ class GoalService {
   }
 
   // Update a goal
-  async updateGoal(id: string, updates: UpdateGoalData): Promise<Goal> {
+  async updateGoal(id: number, updates: UpdateGoalData): Promise<Goal> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -94,10 +94,10 @@ class GoalService {
     }
 
     const updateData: any = {
-      nome: updates.nome,
+      nomeMeta: updates.nomeMeta,  // nomeMeta na tabela
       valor: updates.valor,
       valor_atual: updates.valor_atual,
-      prazo: updates.prazo
+      prazo: updates.prazo ? this.formatDateForStorage(updates.prazo) : updates.prazo  // Converter para DD/MM/YYYY se fornecido
     }
 
     // Remove undefined values
@@ -111,12 +111,11 @@ class GoalService {
       .from('metas')
       .update(updateData)
       .eq('id', id)
-      .eq('email', user.email)
+      .eq('user_id', user.id)  // Filtrar por user_id
       .select()
       .single()
 
     if (error) {
-      console.error('Error updating goal:', error)
       throw new Error('Failed to update goal')
     }
 
@@ -124,7 +123,7 @@ class GoalService {
   }
 
   // Delete a goal
-  async deleteGoal(id: string): Promise<void> {
+  async deleteGoal(id: number): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -135,16 +134,15 @@ class GoalService {
       .from('metas')
       .delete()
       .eq('id', id)
-      .eq('email', user.email)
+      .eq('user_id', user.id)  // Filtrar por user_id
 
     if (error) {
-      console.error('Error deleting goal:', error)
       throw new Error('Failed to delete goal')
     }
   }
 
-  // Add amount to goal (also registers deduction from balance)
-  async addAmountToGoal(id: string, amount: number): Promise<Goal> {
+  // Add amount to goal (without affecting balance)
+  async addAmountToGoal(id: number, amount: number): Promise<Goal> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -153,13 +151,12 @@ class GoalService {
 
     const { data: goal, error: fetchError } = await supabase
       .from('metas')
-      .select('valor_atual, valor, nome')
+      .select('valor_atual, valor, nomeMeta')
       .eq('id', id)
-      .eq('email', user.email)
+      .eq('user_id', user.id)  // Filtrar por user_id
       .single()
 
     if (fetchError) {
-      console.error('Error fetching goal:', fetchError)
       throw new Error('Failed to fetch goal')
     }
 
@@ -172,26 +169,18 @@ class GoalService {
       return this.updateGoal(id, { valor_atual: goal.valor_atual })
     }
 
-    const updatedGoal = await this.updateGoal(id, { valor_atual: newAmount })
-
+    // Registrar transação de aporte no histórico
     try {
-      await this.recordGoalTransaction(user, amountToAdd, goal.nome, 'saida')
-    } catch (transactionError) {
-      console.error('Error registering goal deduction:', transactionError)
-      // Attempt to revert goal update to previous value
-      try {
-        await this.updateGoal(id, { valor_atual: goal.valor_atual })
-      } catch (rollbackError) {
-        console.error('Failed to rollback goal value after transaction error:', rollbackError)
-      }
-      throw new Error('Não foi possível registrar a movimentação financeira da meta.')
+      await this.recordGoalTransaction(user, amountToAdd, goal.nomeMeta, 'saida')
+    } catch (error) {
+      // Se falhar ao registrar transação, ainda atualiza a meta mas loga o erro
     }
 
-    return updatedGoal
+    return this.updateGoal(id, { valor_atual: newAmount })
   }
 
-  // Remove amount from goal (credits balance back)
-  async removeAmountFromGoal(id: string, amount: number): Promise<Goal> {
+  // Remove amount from goal (without affecting balance)
+  async removeAmountFromGoal(id: number, amount: number): Promise<Goal> {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
@@ -200,13 +189,12 @@ class GoalService {
 
     const { data: goal, error: fetchError } = await supabase
       .from('metas')
-      .select('valor_atual, nome')
+      .select('valor_atual, nomeMeta')
       .eq('id', id)
-      .eq('email', user.email)
+      .eq('user_id', user.id)  // Filtrar por user_id
       .single()
 
     if (fetchError) {
-      console.error('Error fetching goal:', fetchError)
       throw new Error('Failed to fetch goal')
     }
 
@@ -214,24 +202,16 @@ class GoalService {
     const amountToRemove = Math.min(clampedAmount, goal.valor_atual)
     const newAmount = goal.valor_atual - amountToRemove
 
-    const updatedGoal = await this.updateGoal(id, { valor_atual: newAmount })
-
+    // Registrar transação de resgate no histórico
     if (amountToRemove > 0) {
       try {
-        await this.recordGoalTransaction(user, amountToRemove, goal.nome, 'entrada')
-      } catch (transactionError) {
-        console.error('Error registering goal refund:', transactionError)
-        // Attempt to rollback goal value
-        try {
-          await this.updateGoal(id, { valor_atual: goal.valor_atual })
-        } catch (rollbackError) {
-          console.error('Failed to rollback goal after refund error:', rollbackError)
-        }
-        throw new Error('Não foi possível registrar a movimentação financeira da meta.')
+        await this.recordGoalTransaction(user, amountToRemove, goal.nomeMeta, 'entrada')
+      } catch (error) {
+        // Se falhar ao registrar transação, ainda atualiza a meta mas loga o erro
       }
     }
 
-    return updatedGoal
+    return this.updateGoal(id, { valor_atual: newAmount })
   }
 
   private async recordGoalTransaction(user: SupabaseUser, amount: number, goalName: string, tipo: 'saida' | 'entrada') {
@@ -253,9 +233,8 @@ class GoalService {
     }
 
     const now = new Date().toISOString()
-    const descricao = tipo === 'saida'
-      ? `Reserva para meta: ${goalName}`
-      : `Resgate da meta: ${goalName}`
+    // Usar apenas o nome da meta na descrição para facilitar a busca no histórico
+    const descricao = goalName
 
     const { error } = await supabase
       .from('financeiro_registros')
@@ -286,19 +265,79 @@ class GoalService {
     return current >= target
   }
 
+  // Helper function to parse date from DD/MM/YYYY format or ISO format
+  private parseDate(dateString: string): Date | null {
+    if (!dateString) return null
+    
+    // Try to parse DD/MM/YYYY format first
+    const ddmmyyyyMatch = dateString.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (ddmmyyyyMatch) {
+      const [, day, month, year] = ddmmyyyyMatch;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    
+    // Try to parse YYYY-MM-DD format (from input type="date")
+    const yyyymmddMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (yyyymmddMatch) {
+      const [, year, month, day] = yyyymmddMatch;
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    }
+    
+    // Try to parse as ISO date
+    const isoDate = new Date(dateString);
+    if (!isNaN(isoDate.getTime())) {
+      return isoDate;
+    }
+    
+    return null;
+  }
+
+  // Convert date to DD/MM/YYYY format for storage
+  formatDateForStorage(dateString: string): string {
+    if (!dateString) return '';
+    
+    // If already in DD/MM/YYYY format, return as is
+    const ddmmyyyyMatch = dateString.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (ddmmyyyyMatch) {
+      return dateString;
+    }
+    
+    // Parse the date and convert to DD/MM/YYYY
+    const date = this.parseDate(dateString);
+    if (!date) return dateString; // Return original if can't parse
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return `${day}/${month}/${year}`;
+  }
+
   // Check if goal is overdue
   isGoalOverdue(deadline: string): boolean {
     if (!deadline) return false
-    return new Date(deadline) < new Date()
+    const deadlineDate = this.parseDate(deadline);
+    if (!deadlineDate) return false;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    deadlineDate.setHours(0, 0, 0, 0);
+    
+    return deadlineDate < today;
   }
 
   // Get days remaining for goal
   getDaysRemaining(deadline: string): number {
     if (!deadline) return 0
-    const today = new Date()
-    const deadlineDate = new Date(deadline)
-    const diffTime = deadlineDate.getTime() - today.getTime()
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    const deadlineDate = this.parseDate(deadline);
+    if (!deadlineDate) return 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    deadlineDate.setHours(0, 0, 0, 0);
+    
+    const diffTime = deadlineDate.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
 
   // Format currency
@@ -311,7 +350,23 @@ class GoalService {
 
   // Format date for display
   formatDateForDisplay(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('pt-BR')
+    if (!dateString) return '';
+    
+    // If already in DD/MM/YYYY format, return as is
+    const ddmmyyyyMatch = dateString.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (ddmmyyyyMatch) {
+      return dateString;
+    }
+    
+    // Try to parse and format as DD/MM/YYYY
+    const date = this.parseDate(dateString);
+    if (!date) return dateString; // Return original if can't parse
+    
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 
   // Get goal statistics

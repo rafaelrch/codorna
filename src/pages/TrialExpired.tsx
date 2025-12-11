@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { AlertCircle, Crown, Lock } from 'lucide-react'
+import { ExclamationCircleIcon, LockClosedIcon } from '@heroicons/react/24/outline'
+import { TrophyIcon } from '@heroicons/react/24/solid'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -9,7 +10,7 @@ export default function TrialExpired() {
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-            <Lock className="h-8 w-8 text-red-600" />
+            <LockClosedIcon className="h-8 w-8 text-red-600" />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
             Período de Teste Expirado
@@ -21,7 +22,7 @@ export default function TrialExpired() {
         <CardContent className="space-y-6">
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex gap-3">
-              <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+              <ExclamationCircleIcon className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <p className="text-sm text-blue-900">
                 Para continuar usando o Codorna, você precisa criar uma conta PRO.
               </p>
@@ -61,7 +62,7 @@ export default function TrialExpired() {
                 target="_blank" 
                 rel="noopener noreferrer"
               >
-                <Crown className="mr-2 h-4 w-4" />
+                <TrophyIcon className="mr-2 h-4 w-4" />
                 Assinar Conta PRO
               </a>
             </Button>

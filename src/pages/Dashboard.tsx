@@ -1,19 +1,46 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { FinancialCard } from '@/components/FinancialCard';
-import { ExpenseChart } from '@/components/ExpenseChart';
 import { FinancialGoals } from '@/components/FinancialGoals';
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { CategoryPieChart } from '@/components/CategoryPieChart';
+import { PaymentMethodAreaChart } from '@/components/PaymentMethodAreaChart';
+import { TransactionTableCard } from '@/components/TransactionTableCard';
+import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { transactionService } from '@/services/transactionService';
 import { useToast } from '@/hooks/use-toast';
+import { DatePicker } from '@/components/ui/date-picker';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useSidebar } from '@/components/ui/sidebar';
+import { PanelLeft } from 'lucide-react';
 
 const timeframes = ['Semana', 'Mês', 'Ano'];
 
+// Função auxiliar para formatar data sem problemas de timezone
+const formatDateLocal = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 export default function Dashboard() {
+  // Função para obter o primeiro dia do mês atual
+  const getFirstDayOfMonth = () => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  };
+
+  // Função para obter o dia atual
+  const getToday = () => {
+    return new Date();
+  };
+
   const [selectedTimeframe, setSelectedTimeframe] = useState('Mês');
   const [currentDate, setCurrentDate] = useState(new Date());
+  // Inicializar com primeiro dia do mês e dia atual
+  const [customStartDate, setCustomStartDate] = useState<Date | undefined>(getFirstDayOfMonth());
+  const [customEndDate, setCustomEndDate] = useState<Date | undefined>(getToday());
   const [stats, setStats] = useState({
     totalIncome: 0,
     totalExpense: 0,
@@ -22,30 +49,32 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Calculate date range based on selected timeframe
+  // Calculate date range based on selected timeframe or custom dates
   const getDateRange = () => {
-    const now = new Date(currentDate);
-    let startDate, endDate;
-
-    switch (selectedTimeframe) {
-      case 'Semana':
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay());
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 6);
-        startDate = startOfWeek.toISOString().split('T')[0];
-        endDate = endOfWeek.toISOString().split('T')[0];
-        break;
-      case 'Ano':
-        startDate = `${now.getFullYear()}-01-01`;
-        endDate = `${now.getFullYear()}-12-31`;
-        break;
-      default: // Mês
-        startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        endDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${lastDay}`;
-        break;
+    // Se "Semana" estiver selecionado, sempre usar últimos 7 dias (ignorar datas customizadas)
+    if (selectedTimeframe === 'Semana') {
+      const now = new Date();
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(now.getDate() - 6); // 6 dias atrás + hoje = 7 dias
+      
+      return {
+        startDate: formatDateLocal(sevenDaysAgo),
+        endDate: formatDateLocal(now)
+      };
     }
+
+    // Se houver datas customizadas, usar elas (prioridade)
+    if (customStartDate && customEndDate) {
+      return {
+        startDate: formatDateLocal(customStartDate),
+        endDate: formatDateLocal(customEndDate)
+      };
+    }
+
+    // Caso contrário, usar o padrão: primeiro dia do mês atual até hoje
+    const now = new Date();
+    const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+    const endDate = formatDateLocal(now); // Até hoje
 
     return { startDate, endDate };
   };
@@ -57,7 +86,6 @@ export default function Dashboard() {
       const data = await transactionService.getTransactionStats(startDate, endDate);
       setStats(data);
     } catch (error) {
-      console.error('Erro ao carregar estatísticas:', error);
       toast({
         title: "Erro",
         description: "Não foi possível carregar as estatísticas.",
@@ -70,10 +98,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadStats();
-  }, [selectedTimeframe, currentDate]);
+  }, [selectedTimeframe, currentDate, customStartDate, customEndDate]);
 
   const handleTimeframeChange = (timeframe: string) => {
     setSelectedTimeframe(timeframe);
+    // Se mudar para Semana, não resetar as datas customizadas (elas serão ignoradas)
+    // Se mudar para outro timeframe, resetar para o padrão
+    if (timeframe !== 'Semana') {
+      setCustomStartDate(getFirstDayOfMonth());
+      setCustomEndDate(getToday());
+      setCurrentDate(new Date());
+    }
   };
 
   const navigateDate = (direction: 'prev' | 'next') => {
@@ -97,77 +132,167 @@ export default function Dashboard() {
   const getDisplayTitle = () => {
     switch (selectedTimeframe) {
       case 'Semana':
-        return `Semana de ${currentDate.toLocaleDateString('pt-BR')}`;
+        return 'Últimos 7 dias';
       case 'Ano':
         return currentDate.getFullYear().toString();
       default: // Mês
-        return currentDate.toLocaleDateString('pt-BR', { month: 'long' });
+        const monthName = currentDate.toLocaleDateString('pt-BR', { month: 'long' });
+        return monthName.charAt(0).toUpperCase() + monthName.slice(1);
     }
+  };
+
+  // Função para formatar data sem problemas de timezone
+  const formatDateForDisplay = (dateString: string): string => {
+    // Extrair a data diretamente do timestamp sem conversão de timezone
+    const dateMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (dateMatch) {
+      const [, year, month, day] = dateMatch;
+      // Formatar como DD/MM/YYYY
+      return `${day}/${month}/${year}`;
+    }
+    
+    // Fallback para o método anterior se o formato não corresponder
+    const date = new Date(dateString);
+    // Usar UTC para evitar problemas de timezone
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Função para converter string de data para Date object sem problemas de timezone
+  const parseDateString = (dateString: string): Date => {
+    const dateMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (dateMatch) {
+      const [, year, month, day] = dateMatch;
+      // Criar data usando UTC para evitar problemas de timezone
+      return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+    }
+    return new Date(dateString);
   };
 
   const getDisplayDateRange = () => {
     const { startDate, endDate } = getDateRange();
     return {
-      start: new Date(startDate).toLocaleDateString('pt-BR'),
-      end: new Date(endDate).toLocaleDateString('pt-BR')
+      start: formatDateForDisplay(startDate),
+      end: formatDateForDisplay(endDate),
+      startDateObj: parseDateString(startDate),
+      endDateObj: parseDateString(endDate)
     };
   };
 
   const dateRange = getDisplayDateRange();
+  const chartDateRange = getDateRange();
+
+  const { state, toggleSidebar } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   return (
-    <div className="min-h-screen bg-[#EBEBEB]">
+    <div className="flex flex-col min-h-screen bg-[#EBEBEB]">
       {/* PRIMEIRA DIVISÃO - Header Controls */}
-      <div className="bg-[#EBEBEB]] px-6 py-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 max-w-7xl mx-auto">
-          {/* Navigation com mês */}
-          <div className="flex items-center gap-4">
-            <SidebarTrigger className="lg:hidden" />
-            <Button variant="ghost" size="sm" onClick={() => navigateDate('prev')}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <h1 className="text-sm font-semibold text-gray-900">{getDisplayTitle()}</h1>
-            <Button variant="ghost" size="sm" onClick={() => navigateDate('next')}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          {/* Timeframe selector - centralizado em mobile, alinhado à esquerda em desktop */}
-          <div className="flex justify-center lg:justify-start">
-            <div className="flex bg-[#D9D9D9] rounded-lg p-1">
-              {timeframes.map((timeframe) => (
-                <Button
-                  key={timeframe}
-                  variant="ghost"
-                  size="sm"
-                  className={`h-8 px-6 font-medium transition-all duration-200 ${
-                    selectedTimeframe === timeframe 
-                      ? "bg-[#F8F6F7] text-black hover:bg-[#F8F6F7] hover:text-black" 
-                      : "text-gray-600 hover:text-gray-900 hover:bg-[#D9D9D9]"
-                  }`}
-                  onClick={() => handleTimeframeChange(timeframe)}
-                >
-                  {timeframe}
-                </Button>
-              ))}
+      <div className="bg-[#EBEBEB] px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
+        <div className="flex flex-col gap-3 sm:gap-4 max-w-7xl mx-auto">
+          {/* Navigation com mês e Timeframe selector - Mesma linha em mobile */}
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            {/* Sidebar toggle e navegação do mês */}
+            <div className="flex items-center gap-1 sm:gap-4 flex-shrink-0">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={toggleSidebar}
+                      className="h-8 w-8 sm:h-9 sm:w-9 text-gray-900 hover:bg-gray-200 flex-shrink-0"
+                    >
+                      <PanelLeft className="h-4 w-4" />
+                      <span className="sr-only">
+                        {isCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}
+                      </span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    {isCollapsed ? "Expandir sidebar" : "Colapsar sidebar"}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              {selectedTimeframe !== 'Semana' && (
+                <>
+                  <Button variant="ghost" size="sm" onClick={() => navigateDate('prev')} className="h-8 w-8 p-0">
+                    <ChevronLeftIcon className="h-4 w-4" />
+                  </Button>
+                  <h1 className="text-sm sm:text-base font-semibold text-gray-900 whitespace-nowrap">{getDisplayTitle()}</h1>
+                  <Button variant="ghost" size="sm" onClick={() => navigateDate('next')} className="h-8 w-8 p-0">
+                    <ChevronRightIcon className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+              {selectedTimeframe === 'Semana' && (
+                <h1 className="text-sm sm:text-base font-semibold text-gray-900 whitespace-nowrap">{getDisplayTitle()}</h1>
+              )}
             </div>
-          </div>
             
-          {/* Date range display */}
-          <div className="flex items-center justify-center lg:justify-start gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500">De</span>
-              <div className="flex items-center gap-2 bg-[#F8F6F7] border rounded-lg px-3 py-2">
-                <Calendar className="h-4 w-4 text-black" />
-                <span className="font-medium text-black">{dateRange.start}</span>
+            {/* Timeframe selector - Na mesma linha em mobile */}
+            <div className="flex justify-center sm:justify-start flex-shrink-0">
+              <div className="flex bg-[#D9D9D9] rounded-lg p-1">
+                {timeframes.map((timeframe) => (
+                  <Button
+                    key={timeframe}
+                    variant="ghost"
+                    size="sm"
+                    className={`h-8 px-2 sm:px-6 text-xs sm:text-sm font-medium transition-all duration-200 ${
+                      selectedTimeframe === timeframe 
+                        ? "bg-[#F8F6F7] text-black hover:bg-[#F8F6F7] hover:text-black" 
+                        : "text-gray-600 hover:text-gray-900 hover:bg-[#D9D9D9]"
+                    }`}
+                    onClick={() => handleTimeframeChange(timeframe)}
+                  >
+                    {timeframe}
+                  </Button>
+                ))}
               </div>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-gray-500">Até</span>
-              <div className="flex items-center gap-2 bg-[#F8F6F7] border rounded-lg px-3 py-2">
-                <Calendar className="h-4 w-4 text-black" />
-                <span className="font-medium text-black">{dateRange.end}</span>
+          </div>
+          
+          {/* Date range - Segunda linha em mobile */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              
+            {/* Date range display */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 whitespace-nowrap">De</span>
+                <DatePicker
+                  date={customStartDate || dateRange.startDateObj}
+                  onSelect={(date) => {
+                    setCustomStartDate(date);
+                    if (date) {
+                      // Não limpar o timeframe, apenas usar a data customizada
+                    } else {
+                      // Se limpar a data, voltar ao padrão do mês atual
+                      setCustomStartDate(undefined);
+                    }
+                  }}
+                  placeholder="Data inicial"
+                  className="w-full sm:w-36"
+                />
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 whitespace-nowrap">Até</span>
+                <DatePicker
+                  date={customEndDate || dateRange.endDateObj}
+                  onSelect={(date) => {
+                    setCustomEndDate(date);
+                    if (date) {
+                      // Não limpar o timeframe, apenas usar a data customizada
+                    } else {
+                      // Se limpar a data, voltar ao padrão do mês atual
+                      setCustomEndDate(undefined);
+                    }
+                  }}
+                  placeholder="Data final"
+                  className="w-full sm:w-36"
+                />
               </div>
             </div>
           </div>
@@ -175,13 +300,13 @@ export default function Dashboard() {
       </div>
 
       {/* SEGUNDA DIVISÃO - Dashboard Content */}
-      <div className="px-9 py-9 mx-6 bg-white rounded-xl">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="px-4 sm:px-6 lg:px-9 py-4 sm:py-6 lg:py-9 mx-2 sm:mx-4 lg:mx-6 bg-white rounded-lg sm:rounded-xl flex-1 mb-4 sm:mb-6">
+        <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
           {/* Dashboard Title */}
-          <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Dashboard</h2>
 
           {/* Financial Cards - 3 cards com space-between */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <FinancialCard
               title="Saldo"
               value={transactionService.formatCurrency(stats.balance)}
@@ -202,24 +327,34 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Chart and Category List Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Expense Chart */}
+          {/* Chart and Goals Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            {/* Category Pie Chart */}
             <div className="lg:col-span-2">
-              <Card className="h-full">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold">Gastos por categoria</CardTitle>
-                </CardHeader>
-                <CardContent >
-                  <ExpenseChart 
-                    startDate={getDateRange().startDate} 
-                    endDate={getDateRange().endDate} 
-                  />
-                </CardContent>
-              </Card>
+              <CategoryPieChart 
+                startDate={chartDateRange.startDate} 
+                endDate={chartDateRange.endDate} 
+              />
             </div>
 
             {/* Goals Section */}
+            <div className="lg:col-span-1 space-y-4 sm:space-y-6">
+              {/* Payment Method Chart */}
+              <PaymentMethodAreaChart 
+                startDate={chartDateRange.startDate} 
+                endDate={chartDateRange.endDate} 
+              />
+            </div>
+          </div>
+
+          {/* Transactions list + Goals */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="lg:col-span-2">
+              <TransactionTableCard 
+                startDate={chartDateRange.startDate}
+                endDate={chartDateRange.endDate}
+              />
+            </div>
             <div className="lg:col-span-1">
               <FinancialGoals />
             </div>

@@ -271,6 +271,87 @@ class UserService {
 
     return { hasAccess: false, isPro: false, trialExpired: true }
   }
+
+  /**
+   * Nova verificação de acesso considerando:
+   * - Tabela users_trial: checa trial_end_at (formato dd/mm/aaaa) e expiração.
+   * - Tabela usuario_compra: checa status (APPROVED libera, outros redirecionam para renovação).
+   * - Tabela users_total: retorna o id para ser usado na plataforma.
+   */
+  async evaluateAccessStatus(): Promise<{
+    redirectTo: string | null
+    userTotalId?: string
+    trialEndFormatted?: string
+  }> {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return { redirectTo: '/login' }
+    }
+
+    // Buscar id na users_total para uso na aplicação
+    let userTotalId: string | undefined
+    try {
+      const { data: totalData } = await supabase
+        .from('users_total')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+      
+      if (totalData?.id) {
+        userTotalId = totalData.id
+      }
+    } catch (error: any) {
+      // Erro silencioso
+    }
+
+    // Verificar compra aprovada
+    try {
+      const { data: compraData, error: compraError } = await supabase
+        .from('usuario_compra')
+        .select('status')
+        .eq('auth_id', user.id)
+        .maybeSingle()
+
+      // Se não houver erro e houver dados
+      if (!compraError && compraData) {
+        if (compraData.status === 'APPROVED') {
+          return { redirectTo: null, userTotalId }
+        } else {
+          return { redirectTo: '/trial-expired', userTotalId }
+        }
+      }
+    } catch (error: any) {
+      // Erro silencioso - usuário pode não ter registro na tabela
+    }
+
+    // Verificar trial
+    try {
+      const { data: trialData } = await supabase
+        .from('users_trial')
+        .select('trial_end_at')
+        .eq('id', user.id)
+        .single()
+
+      if (trialData?.trial_end_at) {
+        const trialEnd = new Date(trialData.trial_end_at)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        const trialEndFormatted = trialEnd.toLocaleDateString('pt-BR')
+        const isExpired = trialEnd < today
+        
+        if (isExpired) {
+          return { redirectTo: '/trial-expired', userTotalId, trialEndFormatted }
+        } else {
+          return { redirectTo: null, userTotalId, trialEndFormatted }
+        }
+      }
+    } catch (error: any) {
+      // Erro silencioso
+    }
+
+    // Caso não esteja em nenhuma tabela específica, permitir acesso padrão
+    return { redirectTo: null, userTotalId }
+  }
 }
 
 export const userService = new UserService()

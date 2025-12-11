@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Loader2, CheckCircle } from 'lucide-react'
+import { ArrowPathIcon, CheckCircleIcon } from '@heroicons/react/24/solid'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { AuthLayout } from '@/components/AuthLayout'
 import { supabase } from '@/lib/supabase'
@@ -38,7 +38,6 @@ export default function ResetPassword() {
           })
           
           if (error) {
-            console.error('Erro ao processar tokens:', error)
             setError('Link inválido ou expirado. Solicite um novo link de redefinição.')
             return
           }
@@ -47,7 +46,6 @@ export default function ResetPassword() {
             setIsValidSession(true)
           }
         } catch (err) {
-          console.error('Erro ao processar reset de senha:', err)
           setError('Erro ao processar o link. Tente novamente.')
         }
       } else {
@@ -103,7 +101,7 @@ export default function ResetPassword() {
       >
         <div className="text-center space-y-6">
           <div className="flex justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <ArrowPathIcon className="h-8 w-8 animate-spin" />
           </div>
           <p className="text-sm text-slate-600">
             Verificando o link de redefinição...
@@ -156,7 +154,7 @@ export default function ResetPassword() {
       >
         <div className="text-center space-y-6">
           <div className="flex justify-center">
-            <CheckCircle className="h-16 w-16 text-green-500" />
+            <CheckCircleIcon className="h-16 w-16 text-green-500" />
           </div>
           
           <div className="p-6 bg-green-50 border border-green-200 rounded-lg">
@@ -259,7 +257,7 @@ export default function ResetPassword() {
         </div>
 
         <Button type="submit" className="w-full h-12 text-base font-medium" disabled={loading}>
-          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {loading && <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />}
           Redefinir Senha
         </Button>
 

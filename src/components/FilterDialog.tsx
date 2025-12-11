@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Filter } from 'lucide-react';
+import { FunnelIcon } from '@heroicons/react/24/outline';
 import { transactionService } from '@/services/transactionService';
 
 interface FilterState {
@@ -63,7 +63,6 @@ export default function FilterDialog({ onApplyFilters, currentFilters }: FilterD
         const data = await transactionService.getAllCategories();
         setCategories(data);
       } catch (error) {
-        console.error('Erro ao carregar categorias:', error);
         // Fallback para categorias padrão
         setCategories([
           { id: 1, nome: 'Casa', tipo: 'saida' },
@@ -137,7 +136,7 @@ export default function FilterDialog({ onApplyFilters, currentFilters }: FilterD
           size="sm" 
           className="w-full sm:w-auto"
         >
-          <Filter className="h-4 w-4 mr-2" />
+          <FunnelIcon className="h-4 w-4 mr-2" />
           Filtrar {hasActiveFilters && `(${activeFiltersCount})`}
         </Button>
       </DialogTrigger>
