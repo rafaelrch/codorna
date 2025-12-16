@@ -2,7 +2,7 @@ import React from 'react';
 
 const DashboardPreview = () => {
   return (
-    <section id="dashboard" className="w-full py-20 px-6 md:px-12">
+    <section id="dashboard" className="w-full py-36 px-6 md:px-12">
       <div className="max-w-7xl mx-auto space-y-16">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <h2 className="text-4xl md:text-6xl font-medium tracking-tighter">
@@ -13,10 +13,10 @@ const DashboardPreview = () => {
           </p>
         </div>
         
-        <div className="cosmic-glow relative rounded-xl overflow-hidden border border-gray-200 backdrop-blur-sm bg-white shadow-[0_0_15px_rgba(0,0,0,0.15)]">
-          <div className="w-full">
+        <div className="cosmic-glow relative rounded-3xl overflow-hidden backdrop-blur-sm bg-white shadow-[0_60px_30px_rgba(0,0,0,0.1)] border-2 border-black/8">
+          <div className="w-full rounded-xl bg-[#f5f5f5]/90 p-4">
             <img 
-              src="/dashboard3.png" 
+              src="/preview.png" 
               alt="Preview do Dashboard Codorna" 
               className="w-full h-auto rounded-xl"
             />
