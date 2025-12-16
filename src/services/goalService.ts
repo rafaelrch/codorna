@@ -241,6 +241,7 @@ class GoalService {
       .insert({
         data_hora: now,
         responsavel: userPhone,
+        user_id: user.id,
         categoria: 'Metas',
         tipo,
         valor: amount,

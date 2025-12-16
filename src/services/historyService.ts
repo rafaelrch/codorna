@@ -18,14 +18,14 @@ class HistoryService {
   async getHistory(): Promise<HistoryEvent[]> {
     const { data: { user } } = await supabase.auth.getUser()
 
-    if (!user || !user.email) {
+    if (!user) {
       throw new Error('Usuário não autenticado')
     }
 
     const { data: transactionsData, error } = await supabase
       .from('financeiro_registros')
       .select('id, tipo, valor, descricao, criado_em, categoria')
-      .eq('email', user.email)
+      .eq('user_id', user.id)
       .neq('categoria', 'Metas') // Excluir transações relacionadas a metas
       .order('criado_em', { ascending: false })
 

@@ -42,7 +42,7 @@ class TransactionService {
     let query = supabase
       .from('financeiro_registros')
       .select('*')
-      .eq('email', user.email)
+      .eq('user_id', user.id)
       .order('criado_em', { ascending: false })
 
     // Apply filters
@@ -140,7 +140,7 @@ class TransactionService {
       .from('financeiro_registros')
       .delete()
       .eq('id', id)
-      .eq('email', user.email)
+      .eq('user_id', user.id)
 
     if (error) {
       throw new Error('Failed to delete transaction')
@@ -201,7 +201,7 @@ class TransactionService {
     let query = supabase
       .from('financeiro_registros')
       .select('valor, tipo, data_hora')
-      .eq('email', user.email)
+      .eq('user_id', user.id)
 
     if (startDate) {
       // Adicionar hora 00:00:00 para garantir que pegue desde o início do dia
@@ -251,7 +251,7 @@ class TransactionService {
     const { data, error } = await supabase
       .from('financeiro_registros')
       .select('valor, tipo, categoria')
-      .eq('email', user.email)
+      .eq('user_id', user.id)
       .gte('criado_em', startDate)
       .lte('criado_em', endDate)
 
@@ -295,7 +295,7 @@ class TransactionService {
     let query = supabase
       .from('financeiro_registros')
       .select('valor, metodo')
-      .eq('email', user.email)
+      .eq('user_id', user.id)
       .eq('tipo', 'saida')
 
     if (startDate) {

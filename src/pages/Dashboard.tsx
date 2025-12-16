@@ -38,9 +38,22 @@ export default function Dashboard() {
 
   const [selectedTimeframe, setSelectedTimeframe] = useState('Mês');
   const [currentDate, setCurrentDate] = useState(new Date());
-  // Inicializar com primeiro dia do mês e dia atual
-  const [customStartDate, setCustomStartDate] = useState<Date | undefined>(getFirstDayOfMonth());
-  const [customEndDate, setCustomEndDate] = useState<Date | undefined>(getToday());
+  
+  // Inicializar datas baseado no timeframe padrão (Mês)
+  const initializeDates = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    return {
+      startDate: new Date(year, month, 1),
+      endDate: new Date(year, month, lastDay)
+    };
+  };
+  
+  const initialDates = initializeDates();
+  const [customStartDate, setCustomStartDate] = useState<Date | undefined>(initialDates.startDate);
+  const [customEndDate, setCustomEndDate] = useState<Date | undefined>(initialDates.endDate);
   const [stats, setStats] = useState({
     totalIncome: 0,
     totalExpense: 0,
@@ -71,10 +84,27 @@ export default function Dashboard() {
       };
     }
 
-    // Caso contrário, usar o padrão: primeiro dia do mês atual até hoje
+    // Caso contrário, calcular baseado no timeframe e currentDate
+    if (selectedTimeframe === 'Ano') {
+      const year = currentDate.getFullYear();
+      const startDate = `${year}-01-01`;
+      const endDate = `${year}-12-31`;
+      return { startDate, endDate };
+    }
+
+    if (selectedTimeframe === 'Mês') {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth() + 1;
+      const lastDay = new Date(year, month, 0).getDate();
+      const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+      const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+      return { startDate, endDate };
+    }
+
+    // Fallback: primeiro dia do mês atual até hoje
     const now = new Date();
     const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-    const endDate = formatDateLocal(now); // Até hoje
+    const endDate = formatDateLocal(now);
 
     return { startDate, endDate };
   };
@@ -102,12 +132,28 @@ export default function Dashboard() {
 
   const handleTimeframeChange = (timeframe: string) => {
     setSelectedTimeframe(timeframe);
-    // Se mudar para Semana, não resetar as datas customizadas (elas serão ignoradas)
-    // Se mudar para outro timeframe, resetar para o padrão
-    if (timeframe !== 'Semana') {
-      setCustomStartDate(getFirstDayOfMonth());
-      setCustomEndDate(getToday());
-      setCurrentDate(new Date());
+    
+    if (timeframe === 'Semana') {
+      // Para semana, não precisamos atualizar datas customizadas (serão ignoradas)
+      return;
+    }
+    
+    // Para Mês ou Ano, atualizar currentDate e limpar datas customizadas
+    const now = new Date();
+    setCurrentDate(now);
+    
+    if (timeframe === 'Ano') {
+      // Para ano, definir primeiro e último dia do ano atual
+      const year = now.getFullYear();
+      setCustomStartDate(new Date(year, 0, 1));
+      setCustomEndDate(new Date(year, 11, 31));
+    } else if (timeframe === 'Mês') {
+      // Para mês, definir primeiro e último dia do mês atual
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      setCustomStartDate(new Date(year, month, 1));
+      setCustomEndDate(new Date(year, month, lastDay));
     }
   };
 
@@ -120,9 +166,19 @@ export default function Dashboard() {
         break;
       case 'Ano':
         newDate.setFullYear(currentDate.getFullYear() + (direction === 'next' ? 1 : -1));
+        // Atualizar datas customizadas para o novo ano
+        const year = newDate.getFullYear();
+        setCustomStartDate(new Date(year, 0, 1));
+        setCustomEndDate(new Date(year, 11, 31));
         break;
       default: // Mês
         newDate.setMonth(currentDate.getMonth() + (direction === 'next' ? 1 : -1));
+        // Atualizar datas customizadas para o novo mês
+        const newYear = newDate.getFullYear();
+        const newMonth = newDate.getMonth();
+        const lastDay = new Date(newYear, newMonth + 1, 0).getDate();
+        setCustomStartDate(new Date(newYear, newMonth, 1));
+        setCustomEndDate(new Date(newYear, newMonth, lastDay));
         break;
     }
     
@@ -264,12 +320,19 @@ export default function Dashboard() {
                 <DatePicker
                   date={customStartDate || dateRange.startDateObj}
                   onSelect={(date) => {
-                    setCustomStartDate(date);
                     if (date) {
-                      // Não limpar o timeframe, apenas usar a data customizada
+                      setCustomStartDate(date);
                     } else {
-                      // Se limpar a data, voltar ao padrão do mês atual
+                      // Se limpar a data, recalcular baseado no timeframe
                       setCustomStartDate(undefined);
+                      if (selectedTimeframe === 'Ano') {
+                        const year = currentDate.getFullYear();
+                        setCustomStartDate(new Date(year, 0, 1));
+                      } else if (selectedTimeframe === 'Mês') {
+                        const year = currentDate.getFullYear();
+                        const month = currentDate.getMonth();
+                        setCustomStartDate(new Date(year, month, 1));
+                      }
                     }
                   }}
                   placeholder="Data inicial"
@@ -282,12 +345,20 @@ export default function Dashboard() {
                 <DatePicker
                   date={customEndDate || dateRange.endDateObj}
                   onSelect={(date) => {
-                    setCustomEndDate(date);
                     if (date) {
-                      // Não limpar o timeframe, apenas usar a data customizada
+                      setCustomEndDate(date);
                     } else {
-                      // Se limpar a data, voltar ao padrão do mês atual
+                      // Se limpar a data, recalcular baseado no timeframe
                       setCustomEndDate(undefined);
+                      if (selectedTimeframe === 'Ano') {
+                        const year = currentDate.getFullYear();
+                        setCustomEndDate(new Date(year, 11, 31));
+                      } else if (selectedTimeframe === 'Mês') {
+                        const year = currentDate.getFullYear();
+                        const month = currentDate.getMonth();
+                        const lastDay = new Date(year, month + 1, 0).getDate();
+                        setCustomEndDate(new Date(year, month, lastDay));
+                      }
                     }
                   }}
                   placeholder="Data final"
