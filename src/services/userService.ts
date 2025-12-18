@@ -288,6 +288,52 @@ class UserService {
       return { redirectTo: '/login' }
     }
 
+    const shouldDebugAccess =
+      (typeof import.meta !== 'undefined' && (import.meta as any)?.env?.DEV) ||
+      ((import.meta as any)?.env?.VITE_DEBUG_ACCESS === 'true')
+
+    const debugAccess = (...args: any[]) => {
+      if (shouldDebugAccess) {
+        // eslint-disable-next-line no-console
+        console.info('[access]', ...args)
+      }
+    }
+
+    const metadataIsPro =
+      user.user_metadata?.subscription_type === 'pro' ||
+      user.user_metadata?.is_pro === true
+
+    const normalizeStatus = (status: unknown) =>
+      typeof status === 'string' ? status.trim().toUpperCase() : ''
+
+    const isApprovedPurchaseStatus = (status: unknown) => {
+      const s = normalizeStatus(status)
+      // Aceitar variações comuns (case/whitespace) e possíveis status equivalentes
+      return (
+        s === 'APPROVED' ||
+        s === 'APROVADO' ||
+        s === 'PAID' ||
+        s === 'ACTIVE' ||
+        s.startsWith('APPROV') // APPROVED/APROVADO/etc
+      )
+    }
+
+    const isBlockedPurchaseStatus = (status: unknown) => {
+      const s = normalizeStatus(status)
+      return (
+        s === 'CANCELLED' ||
+        s === 'CANCELED' ||
+        s === 'CANCELADO' ||
+        s === 'REFUNDED' ||
+        s === 'REEMBOLSADO' ||
+        s === 'CHARGEDBACK' ||
+        s === 'REJECTED' ||
+        s === 'RECUSADO' ||
+        s === 'EXPIRED' ||
+        s === 'EXPIRADO'
+      )
+    }
+
     // Buscar id na users_total para uso na aplicação
     let userTotalId: string | undefined
     try {
@@ -314,14 +360,62 @@ class UserService {
 
       // Se não houver erro e houver dados
       if (!compraError && compraData) {
-        if (compraData.status === 'APPROVED') {
+        if (isApprovedPurchaseStatus(compraData.status)) {
+          debugAccess('allowed: usuario_compra approved', { userId: user.id, status: compraData.status })
           return { redirectTo: null, userTotalId }
-        } else {
+        }
+
+        // Se a compra existe e está explicitamente bloqueada, redirecionar
+        if (isBlockedPurchaseStatus(compraData.status)) {
+          debugAccess('blocked: usuario_compra status blocked', { userId: user.id, status: compraData.status })
           return { redirectTo: '/trial-expired', userTotalId }
         }
+        // Caso a compra exista mas esteja pendente/indefinida, não bloquear aqui:
+        // segue para outras fontes de PRO (metadata/users_2/users_pro) e trial.
+        debugAccess('purchase present but not decisive', { userId: user.id, status: compraData.status })
       }
     } catch (error: any) {
       // Erro silencioso - usuário pode não ter registro na tabela
+    }
+
+    // Outras fontes de PRO (não dependem de usuario_compra)
+    if (metadataIsPro) {
+      debugAccess('allowed: metadata pro', { userId: user.id })
+      return { redirectTo: null, userTotalId }
+    }
+
+    try {
+      const { data: users2Data, error: users2Error } = await supabase
+        .from('users_2')
+        .select('plan,status')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (!users2Error && users2Data) {
+        const plan = normalizeStatus(users2Data.plan)
+        const status = normalizeStatus(users2Data.status)
+        if (plan === 'PRO' || status === 'PRO') {
+          debugAccess('allowed: users_2 pro', { userId: user.id, plan: users2Data.plan, status: users2Data.status })
+          return { redirectTo: null, userTotalId }
+        }
+      }
+    } catch (error: any) {
+      // Erro silencioso
+    }
+
+    try {
+      const { data: proData, error: proError } = await supabase
+        .from('users_pro')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (!proError && proData) {
+        debugAccess('allowed: users_pro', { userId: user.id })
+        return { redirectTo: null, userTotalId }
+      }
+    } catch (error: any) {
+      // Erro silencioso
     }
 
     // Verificar trial
@@ -340,8 +434,10 @@ class UserService {
         const isExpired = trialEnd < today
         
         if (isExpired) {
+          debugAccess('blocked: trial expired', { userId: user.id, trial_end_at: trialData.trial_end_at })
           return { redirectTo: '/trial-expired', userTotalId, trialEndFormatted }
         } else {
+          debugAccess('allowed: trial active', { userId: user.id, trial_end_at: trialData.trial_end_at })
           return { redirectTo: null, userTotalId, trialEndFormatted }
         }
       }
@@ -350,6 +446,7 @@ class UserService {
     }
 
     // Caso não esteja em nenhuma tabela específica, permitir acesso padrão
+    debugAccess('allowed: default fallback', { userId: user.id })
     return { redirectTo: null, userTotalId }
   }
 }
