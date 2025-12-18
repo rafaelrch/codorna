@@ -220,56 +220,61 @@ class UserService {
       return { hasAccess: false, isPro: false, trialExpired: true }
     }
 
-    const metadataIsPro = user.user_metadata?.subscription_type === 'pro' || user.user_metadata?.is_pro === true
+    const normalizeStatus = (status: unknown) =>
+      typeof status === 'string' ? status.trim().toUpperCase() : ''
 
-    let userData: UserData | null = null
-    const { data: users2Data, error: users2Error } = await supabase
-      .from('users_2')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!users2Error && users2Data) {
-      userData = users2Data as UserData
+    const isApprovedPurchaseStatus = (status: unknown) => {
+      const s = normalizeStatus(status)
+      return (
+        s === 'APPROVED' ||
+        s === 'APROVADO' ||
+        s === 'PAID' ||
+        s === 'ACTIVE' ||
+        s.startsWith('APPROV')
+      )
     }
 
-    if (userData) {
-      if (userData.plan === 'pro' || userData.status === 'pro') {
+    const metadataIsPro =
+      user.user_metadata?.subscription_type === 'pro' ||
+      user.user_metadata?.is_pro === true
+
+    try {
+      const { data: compraData, error: compraError } = await supabase
+        .from('usuario_compra')
+        .select('status')
+        .eq('auth_id', user.id)
+        .maybeSingle()
+
+      if (!compraError && compraData && isApprovedPurchaseStatus(compraData.status)) {
         return { hasAccess: true, isPro: true, trialExpired: false }
       }
-
-      if (userData.plan === 'trial' || userData.status === 'trial') {
-        const now = new Date()
-        const trialEndAt = userData.trial_end_at ? new Date(userData.trial_end_at) : null
-        const trialExpired = trialEndAt ? now > trialEndAt : true
-
-        if (metadataIsPro) {
-          return { hasAccess: true, isPro: true, trialExpired: false }
-        }
-
-        return {
-          hasAccess: !trialExpired,
-          isPro: false,
-          trialExpired
-        }
-      }
+    } catch {
+      // ignore
     }
 
     if (metadataIsPro) {
       return { hasAccess: true, isPro: true, trialExpired: false }
     }
 
-    const { data: proData, error: proError } = await supabase
-      .from('users_pro')
-      .select('user_id')
-      .eq('user_id', user.id)
-      .single()
+    try {
+      const { data: trialData } = await supabase
+        .from('users_trial')
+        .select('trial_end_at')
+        .eq('id', user.id)
+        .maybeSingle()
 
-    if (!proError && proData) {
-      return { hasAccess: true, isPro: true, trialExpired: false }
+      if (trialData?.trial_end_at) {
+        const now = new Date()
+        const trialEndAt = new Date(trialData.trial_end_at)
+        const trialExpired = now > trialEndAt
+        return { hasAccess: !trialExpired, isPro: false, trialExpired }
+      }
+    } catch {
+      // ignore
     }
 
-    return { hasAccess: false, isPro: false, trialExpired: true }
+    // Mantém o comportamento atual do projeto (fallback libera)
+    return { hasAccess: true, isPro: false, trialExpired: false }
   }
 
   /**
@@ -371,7 +376,7 @@ class UserService {
           return { redirectTo: '/trial-expired', userTotalId }
         }
         // Caso a compra exista mas esteja pendente/indefinida, não bloquear aqui:
-        // segue para outras fontes de PRO (metadata/users_2/users_pro) e trial.
+        // segue para outras fontes de PRO (metadata) e trial.
         debugAccess('purchase present but not decisive', { userId: user.id, status: compraData.status })
       }
     } catch (error: any) {
@@ -382,40 +387,6 @@ class UserService {
     if (metadataIsPro) {
       debugAccess('allowed: metadata pro', { userId: user.id })
       return { redirectTo: null, userTotalId }
-    }
-
-    try {
-      const { data: users2Data, error: users2Error } = await supabase
-        .from('users_2')
-        .select('plan,status')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (!users2Error && users2Data) {
-        const plan = normalizeStatus(users2Data.plan)
-        const status = normalizeStatus(users2Data.status)
-        if (plan === 'PRO' || status === 'PRO') {
-          debugAccess('allowed: users_2 pro', { userId: user.id, plan: users2Data.plan, status: users2Data.status })
-          return { redirectTo: null, userTotalId }
-        }
-      }
-    } catch (error: any) {
-      // Erro silencioso
-    }
-
-    try {
-      const { data: proData, error: proError } = await supabase
-        .from('users_pro')
-        .select('user_id')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      if (!proError && proData) {
-        debugAccess('allowed: users_pro', { userId: user.id })
-        return { redirectTo: null, userTotalId }
-      }
-    } catch (error: any) {
-      // Erro silencioso
     }
 
     // Verificar trial
