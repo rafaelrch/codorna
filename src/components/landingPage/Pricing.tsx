@@ -25,7 +25,7 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
     },
     {
       name: "PRO",
-      price: "R$ 19,00",
+      price: "R$ 19,90",
       description: "/mês",
       features: [
         "Tudo do trial ilimitado",
@@ -61,7 +61,7 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
                   <h3 className={`text-lg font-regular mb-3 ${plan.isPro ? 'text-white' : 'text-gray-700'}`}>{plan.name}</h3>
                   <div className="mb-4">
                     <div className={`text-3xl md:text-5xl font-bold tracking-tighter ${plan.isPro ? 'text-white' : 'text-gray-900'}`}>{plan.price}</div>
-                    <div className={`text-sm mt-1 ${plan.isPro ? 'text-white/80' : 'text-gray-500'}`}>{plan.description}</div>
+                    <div className={`text-base mt-1 ${plan.isPro ? 'text-white/80' : 'text-gray-500'}`}>{plan.description}</div>
                   </div>
                   
                   <div className={`border-t mb-6 ${plan.isPro ? 'border-white/30' : 'border-gray-300'}`}></div>
