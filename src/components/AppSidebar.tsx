@@ -198,7 +198,7 @@ export function AppSidebar() {
           .from('users_trial')
           .select('trial_end_at')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         if (trialData?.trial_end_at) {
           const trialEndDate = new Date(trialData.trial_end_at);

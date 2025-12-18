@@ -215,9 +215,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     if (error) {
+      const hint =
+        error.message === 'Invalid login credentials'
+          ? 'Confira email e senha. Se você criou a conta em outro projeto Supabase (URL/keys diferentes) este site não vai reconhecer. Se o email ainda não foi confirmado, confirme e tente novamente.'
+          : null
+
       toast({
         title: "Erro no login",
-        description: error.message,
+        description: hint ? `${error.message}. ${hint}` : error.message,
         variant: "destructive",
       })
     }
