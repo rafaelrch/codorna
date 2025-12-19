@@ -13,7 +13,7 @@ const DashboardPreview = () => {
           </p>
         </div>
         
-        <div className="cosmic-glow relative rounded-3xl overflow-hidden backdrop-blur-sm bg-white shadow-[0_60px_30px_rgba(0,0,0,0.1)] border-2 border-black/8">
+        <div className="cosmic-glow relative rounded-3xl overflow-hidden backdrop-blur-sm bg-white shadow-[0_60px_30px_rgba(0,0,0,0.1)] border border-black/8">
           <div className="w-full rounded-xl bg-[#f5f5f5]/90 p-4">
             <img 
               src="/preview.png" 

@@ -41,32 +41,59 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
   ];
   
   return (
-    <section id="pricing" className="w-full py-20 px-6 md:px-12 bg-white">
-      <div className="max-w-5xl mx-auto space-y-16">
+    <section id="pricing" className="w-full py-20 px-6 md:px-12 bg-white relative">
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(-20px);
+          }
+          50% {
+            transform: translateY(-30px);
+          }
+        }
+        .float-animation {
+          animation: float 4s ease-in-out infinite;
+        }
+      `}</style>
+      {/* Padrão de pontos pretos com gradiente radial centralizado atrás do card PRO */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 75% 50%, rgba(0, 0, 0, 0.11) 1.5px, transparent 1.5px),
+            radial-gradient(circle at 75% 50%, rgba(0, 0, 0, 0.33) 1px, transparent 1px)
+          `,
+          backgroundSize: '12px 12px, 90px',
+          backgroundPosition: 'center center',
+          maskImage: 'radial-gradient(circle at 60% 55%, black 15%, transparent 45%)',
+          WebkitMaskImage: 'radial-gradient(circle at 75% 50%, black 20%, transparent 40%)'
+        }}
+      />
+      <div className="max-w-5xl mx-auto space-y-48 relative z-10">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-6xl font-medium tracking-tighter text-gray-900">
+          <h2 className="text-4xl md:text-7xl font-medium tracking-tighter text-gray-900">
             Escolha seu <span className="text-[#208251]">plano</span>
           </h2>
         </div>
         
-        <div className="flex flex-col md:flex-row justify-center gap-8 max-w-4xl mx-auto">
+        <div className="flex flex-col md:flex-row justify-center gap-20 max-w-4xl mx-auto">
           {plans.map((plan, index) => {
             if (plan.isPro) {
               return (
                 <div 
                   key={index}
-                  className="rounded-[35px] flex flex-col min-h-[600px] w-full max-w-sm mx-auto md:mx-0 transition-all duration-300 bg-[#208251] text-white relative overflow-hidden shadow-[0_20px_120px_rgba(0,0,0,0.3)]"
+                  className="rounded-[25px] flex flex-col min-h-[600px] w-full max-w-sm mx-auto md:mx-0 transition-all duration-300 bg-[#208251] text-white relative overflow-hidden shadow-[0_70px_60px_rgba(0,0,0,0.2)] -mt-8 md:-mt-12 z-20 float-animation"
                   style={{
                     background: '#208251',
                     backgroundImage: 'radial-gradient(circle at bottom right,rgba(107, 212, 133, 0.66), transparent 60%)'
                   }}
                 >
                   {/* Primeira parte: Card quadrado com badge/preço e botão */}
-                  <div className="mb-2 p-4 space-y-6 bg-white rounded-[35px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
+                  <div className="mb-6 border-2 border-white p-3 space-y-6 bg-white rounded-[25px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
                     {/* Parte de cima: Card com background verde 10% opacidade */}
-                    <div className="bg-[#D5E6DC] p-4 h-52 rounded-[31px] flex flex-col justify-between">
+                    <div className="bg-[#D5E6DC] p-4 h-52 rounded-[21px] flex flex-col justify-between">
                       {/* Badge Mensal - Topo */}
-                      <div className="bg-[#142923] border-2 border-[#208251] rounded-full px-8 py-1 flex items-center gap-2 w-fit">
+                      <div className="bg-[#142923] border border-[#208251] rounded-full px-8 py-1 flex items-center gap-2 w-fit">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#65DA7C]">
                           <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor"/>
                           <circle cx="12" cy="9" r="2" fill="currentColor" opacity="0.4"/>
@@ -121,7 +148,7 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
             return (
               <div 
                 key={index}
-                className="p-6 md:p-8 rounded-3xl flex flex-col min-h-[600px] w-full max-w-sm mx-auto md:mx-0 transition-all duration-300 bg-white border border-gray-200 text-gray-900"
+                className="p-6 md:p-8 rounded-3xl flex flex-col min-h-[600px] w-full max-w-sm mx-auto md:mx-0 transition-all duration-300 bg-white border border-gray-200 text-gray-900 z-10"
               >
                 <div className="flex flex-col h-full">
                   <div className="mb-6">

@@ -63,6 +63,7 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
         prazo: prazoString || undefined,
       }
 
+      console.log('Creating goal with data:', goalData)
       await goalService.createGoal(goalData)
       
       toast({
@@ -81,6 +82,7 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
       setOpen(false)
       onAddGoal()
     } catch (error: any) {
+      console.error('Error creating goal:', error)
       toast({
         title: "Erro",
         description: error.message || "Não foi possível criar a meta.",
@@ -97,12 +99,12 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
           Nova Meta
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md max-w-[90vw] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">Nova Meta</DialogTitle>
+          <DialogTitle>Nova Meta</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="nome"
@@ -184,11 +186,11 @@ export default function AddGoalDialog({ onAddGoal }: AddGoalDialogProps) {
               )}
             />
 
-            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" className='bg-black hover:bg-black/90 w-full sm:w-auto'>Criar Meta</Button>
+              <Button type="submit" className='bg-black hover:bg-black/90'>Criar Meta</Button>
             </div>
           </form>
         </Form>

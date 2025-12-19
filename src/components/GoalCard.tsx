@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -46,6 +46,10 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [amount, setAmount] = useState('')
+  const shouldUpdateAfterAddRef = useRef(false)
+  const shouldUpdateAfterRemoveRef = useRef(false)
+  const shouldUpdateAfterEditRef = useRef(false)
+  const shouldUpdateAfterDeleteRef = useRef(false)
   // Helper to convert DD/MM/YYYY to YYYY-MM-DD for date input
   const convertToDateInput = (dateStr: string): string => {
     if (!dateStr) return '';
@@ -89,6 +93,35 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
   const isOverdue = goal.prazo ? goalService.isGoalOverdue(goal.prazo) : false
   const daysRemaining = goal.prazo ? goalService.getDaysRemaining(goal.prazo) : null
 
+  // Atualizar quando os dialogs fecharem completamente
+  useEffect(() => {
+    if (!addAmountOpen && shouldUpdateAfterAddRef.current) {
+      shouldUpdateAfterAddRef.current = false
+      onUpdate()
+    }
+  }, [addAmountOpen, onUpdate])
+
+  useEffect(() => {
+    if (!removeAmountOpen && shouldUpdateAfterRemoveRef.current) {
+      shouldUpdateAfterRemoveRef.current = false
+      onUpdate()
+    }
+  }, [removeAmountOpen, onUpdate])
+
+  useEffect(() => {
+    if (!editOpen && shouldUpdateAfterEditRef.current) {
+      shouldUpdateAfterEditRef.current = false
+      onUpdate()
+    }
+  }, [editOpen, onUpdate])
+
+  useEffect(() => {
+    if (!deleteOpen && shouldUpdateAfterDeleteRef.current) {
+      shouldUpdateAfterDeleteRef.current = false
+      onDelete()
+    }
+  }, [deleteOpen, onDelete])
+
   const handleAddAmount = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       toast({
@@ -106,8 +139,9 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
         description: `R$ ${parseFloat(amount).toFixed(2)} adicionado à meta!`,
       })
       setAmount('')
+      // Marcar que precisa atualizar quando o dialog fechar
+      shouldUpdateAfterAddRef.current = true
       setAddAmountOpen(false)
-      onUpdate()
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -134,8 +168,9 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
         description: `R$ ${parseFloat(amount).toFixed(2)} removido da meta!`,
       })
       setAmount('')
+      // Marcar que precisa atualizar quando o dialog fechar
+      shouldUpdateAfterRemoveRef.current = true
       setRemoveAmountOpen(false)
-      onUpdate()
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -174,8 +209,9 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
         title: "Sucesso",
         description: "Meta atualizada com sucesso!",
       })
+      // Marcar que precisa atualizar quando o dialog fechar
+      shouldUpdateAfterEditRef.current = true
       setEditOpen(false)
-      onUpdate()
     } catch (error: any) {
       toast({
         title: "Erro",
@@ -192,8 +228,9 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
         title: "Sucesso",
         description: "Meta excluída com sucesso!",
       })
+      // Marcar que precisa atualizar quando o dialog fechar
+      shouldUpdateAfterDeleteRef.current = true
       setDeleteOpen(false)
-      onDelete()
     } catch (error: any) {
       toast({
         title: "Erro",
