@@ -60,7 +60,7 @@ export function FinancialCard({ title, value, type, loading = false, className }
           }}
         />
       )}
-      <CardContent className={cn("p-4 sm:p-6 lg:p-8 relative min-h-[120px] sm:min-h-[140px]", type === 'balance' && "text-white")}>
+      <CardContent className={cn("p-4 sm:p-6 lg:p-8 relative min-h-[120px] sm:min-h-[10px]", type === 'balance' && "text-white")}>
         <div className="flex items-center justify-between h-full">
           <div className="space-y-1 flex-1 min-w-0">
             <p className={cn("text-base sm:text-base font-regular tracking-tighter", type === 'balance' ? "text-white/80" : "text-[#727272]")}>{title}</p>
