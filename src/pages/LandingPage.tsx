@@ -24,7 +24,7 @@ const LandingPage = () => {
           <DashboardPreview />
           <VideoDemoSection />
           <AdvisorSection onOpenWaitlist={() => setIsWaitlistOpen(true)} />
-          <Testimonials />
+          {/* <Testimonials /> */}
           <Pricing onOpenWaitlist={() => setIsWaitlistOpen(true)} />
           <FAQ />
         </main>

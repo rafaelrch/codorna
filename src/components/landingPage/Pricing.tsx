@@ -63,9 +63,9 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
             radial-gradient(circle at 75% 50%, rgba(0, 0, 0, 0.11) 1.5px, transparent 1.5px),
             radial-gradient(circle at 75% 50%, rgba(0, 0, 0, 0.33) 1px, transparent 1px)
           `,
-          backgroundSize: '12px 12px, 90px',
+          backgroundSize: '12px 12px, 100px',
           backgroundPosition: 'center center',
-          maskImage: 'radial-gradient(circle at 60% 55%, black 15%, transparent 45%)',
+          maskImage: 'radial-gradient(circle at 75% 50%, black 15%, transparent 45%)',
           WebkitMaskImage: 'radial-gradient(circle at 75% 50%, black 20%, transparent 40%)'
         }}
       />
@@ -105,12 +105,11 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
                       <div className="flex items-end gap-1">
                         <div>
                           <span className="text-3xl md:text-3xl font-regular tracking-tighter text-[#000000]">R$</span>
-                          <span className="text-4xl md:text-6xl font-bold tracking-tighter text-[#000000]">19</span>
+                          <span className="text-4xl md:text-6xl font-bold tracking-tighter text-[#000000]">19,90</span>
                         </div>
                         
                         
                         <div className='flex flex-col items-start '>
-                          <span className="text-lg md:text-lg font-medium tracking-tighter text-[#000000]">,90</span>
                           <span className="text-2xl tracking-tighter text-[#000000]">/mês</span>
                         </div>
                         

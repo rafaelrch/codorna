@@ -70,7 +70,7 @@ const AdvisorSection = ({ onOpenWaitlist }: AdvisorSectionProps) => {
             Interaja com o <span className="text-[#208251]">Codorna 24h</span> por dia
           </h1>
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-            Pergunte o que quiser e como quiser sobre as suas finanças ou seus compromissos. Veja alguns exemplos abaixo.
+            Pergunte o que quiser e como quiser sobre as suas finanças. Veja alguns exemplos abaixo.
           </p>
         </div>
       </div>
@@ -83,19 +83,19 @@ const AdvisorSection = ({ onOpenWaitlist }: AdvisorSectionProps) => {
           return (
             <div key={carouselIndex} className="w-full overflow-hidden relative">
               {/* Gradiente esquerdo */}
-              <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+              <div className="absolute left-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
               
               {/* Gradiente direito */}
-              <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
+              <div className="absolute right-0 top-0 bottom-0 w-16 md:w-24 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
               
               <div className={`flex gap-4 ${isReverse ? 'animate-scroll-reverse' : 'animate-scroll-forward'}`}>
                 {/* Duplicar items para criar loop infinito */}
                 {[...items, ...items, ...items].map((item, itemIndex) => (
                   <div
                     key={itemIndex}
-                    className="group flex-shrink-0 px-7 py-5 rounded-full border-2 border-[#208251] bg-white hover:bg-[#208251] duration-500 transition-colors whitespace-nowrap"
+                    className="group flex-shrink-0 px-4 py-2.5 md:px-7 md:py-5 rounded-full border-2 border-[#208251] bg-white hover:bg-[#208251] duration-500 transition-colors whitespace-nowrap"
                   >
-                    <span className="text-[#208251] group-hover:text-white text-base md:text-lg font-normal tracking-tighter transition-colors duration-500">
+                    <span className="text-[#208251] group-hover:text-white text-sm md:text-lg font-normal tracking-tighter transition-colors duration-500">
                       {item}
                     </span>
                   </div>

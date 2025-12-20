@@ -428,12 +428,28 @@
     }
   }
 
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(33.333%);
+    }
+    50% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
+
   .animate-scroll-forward {
-    animation: scroll-forward 20s linear infinite;
+    animation: scroll-forward 12s linear infinite;
   }
 
   .animate-scroll-reverse {
-    animation: scroll-reverse 20s linear infinite;
+    animation: scroll-reverse 12s linear infinite;
+  }
+
+  .animate-scroll-left {
+    animation: scroll-left 24s linear infinite;
   }
 
   /* Animações para círculos flutuantes */

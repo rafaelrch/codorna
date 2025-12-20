@@ -9,7 +9,7 @@ const VideoDemoSection = () => {
           {/* Texto à Esquerda */}
           <div className="space-y-6">
             <h2 
-              className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight"
+              className="text-4xl md:text-6xl lg:text-6xl font-medium tracking-tight"
               style={{
                 fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
                 fontWeight: 400,
@@ -17,7 +17,7 @@ const VideoDemoSection = () => {
                 lineHeight: '67px'
               }}
             >
-              Registre tudo no <span className="text-[#208251]">WhatsApp</span>
+              Registre tudo no <span className="text-[#208251] font-semibold tracking-tighter">WhatsApp</span>
             </h2>
             <p 
               className="text-lg text-gray-600 leading-relaxed max-w-lg"
@@ -164,7 +164,7 @@ const VideoDemoSection = () => {
                 lineHeight: '67px'
               }}
             >
-              <span className="text-[#208251]">Painel</span> Profissional
+              <span className="text-[#208251] font-semibold tracking-tighter">Painel</span> Profissional
             </h2>
             <p 
               className="text-lg text-gray-600 leading-relaxed max-w-lg"

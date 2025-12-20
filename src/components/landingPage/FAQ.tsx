@@ -98,7 +98,7 @@ const FAQ = () => {
                 />
               </svg>
               <span className="text-sm font-medium text-[#208251]">
-                Frequently asked questions
+                Perguntas frequentes
               </span>
             </div>
 
@@ -112,8 +112,8 @@ const FAQ = () => {
                 lineHeight: '67px'
               }}
             >
-              Frequently asked{' '}
-              <span className="text-[#208251]">questions</span>
+              Perguntas{' '}
+              <span className="text-[#208251]">frequentes</span>
             </h2>
 
             {/* Description */}

@@ -13,35 +13,35 @@ const Testimonials = () => {
     {
       name: "Maria Silva",
       image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-      joinDate: "15/01/2024",
+      joinDate: "15/01/2025",
       feedback: "Consegui economizar 30% do meu salário usando o Codorna. O controle de gastos é incrível e me ajudou a alcançar minhas metas financeiras.",
       rating: 5
     },
     {
       name: "João Santos",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-      joinDate: "03/12/2023",
+      joinDate: "03/12/2025",
       feedback: "Finalmente consegui organizar minhas finanças! O dashboard é muito intuitivo e os relatórios me ajudam a tomar melhores decisões.",
       rating: 5
     },
     {
       name: "Ana Costa",
       image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
-      joinDate: "22/11/2023",
+      joinDate: "22/11/2025",
       feedback: "A família toda usa o Codorna agora. Conseguimos controlar nossos gastos e economizar para a viagem dos sonhos.",
       rating: 5
     },
     {
       name: "Pedro Oliveira",
       image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-      joinDate: "08/10/2023",
+      joinDate: "08/10/2025",
       feedback: "A melhor ferramenta de gestão financeira que já usei. Simples, eficiente e me ajuda a manter o controle total.",
       rating: 5
     },
     {
       name: "Carla Mendes",
       image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop",
-      joinDate: "17/09/2023",
+      joinDate: "17/09/2025",
       feedback: "O Codorna transformou minha relação com o dinheiro. Agora tenho clareza total sobre meus gastos e consigo planejar melhor.",
       rating: 5
     }
@@ -53,13 +53,13 @@ const Testimonials = () => {
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="relative w-full h-full max-w-4xl mx-auto">
           {/* Círculo 1 - Verde claro */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#16e26d] rounded-full blur-3xl opacity-30 animate-float-1"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#16e26d] rounded-full blur-3xl opacity-15 animate-float-1"></div>
           
           {/* Círculo 2 - Verde médio */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[#208251] rounded-full blur-3xl opacity-25 animate-float-2"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[#208251] rounded-full blur-3xl opacity-15 animate-float-2"></div>
           
           {/* Círculo 3 - Verde escuro */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1a6941] rounded-full blur-3xl opacity-20 animate-float-3"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1a6941] rounded-full blur-3xl opacity-10 animate-float-3"></div>
         </div>
       </div>
 
@@ -82,15 +82,15 @@ const Testimonials = () => {
         {/* Gradiente direito */}
         <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
         
-        <div className="flex gap-6 animate-scroll-forward">
+        <div className="flex gap-3 md:gap-6 animate-scroll-left">
           {/* Duplicar items para criar loop infinito */}
           {[...testimonials, ...testimonials, ...testimonials].map((testimonial, index) => (
             <div
               key={index}
-              className="p-3 flex-shrink-0 w-[290px] md:w-[340px] rounded-[40px] overflow-hidden bg-white  shadow-[0_50px_40px_rgba(0,0,0,0.05)] transition-shadow duration-300"
+              className="p-1.5 md:p-3 flex-shrink-0 w-[200px] md:w-[340px] rounded-[25px] md:rounded-[40px] overflow-hidden bg-white shadow-[0_50px_40px_rgba(0,0,0,0.05)] transition-shadow duration-300"
             >
               {/* Imagem */}
-              <div className="relative w-full h-72 overflow-hidden rounded-[37px]">
+              <div className="relative w-full h-48 md:h-72 overflow-hidden rounded-[20px] md:rounded-[37px]">
                 <img
                   src={testimonial.image}
                   alt={testimonial.name}
@@ -100,30 +100,31 @@ const Testimonials = () => {
               </div>
 
               {/* Conteúdo */}
-              <div className="p-4 space-y-2">
+              <div className="p-2.5 md:p-4 space-y-1 md:space-y-2">
                 {/* Nome e verificação */}
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-bold text-gray-900">{testimonial.name}</h3>
+                <div className="flex items-center gap-1 md:gap-2">
+                  <h3 className="text-sm md:text-xl font-bold text-gray-900">{testimonial.name}</h3>
                   <img
                     src="/selo-verificado.png"
                     alt="Verificado"
-                    className="w-3 h-3"
+                    className="w-2 h-2 md:w-3 md:h-3"
                   />
                 </div>
 
                 {/* Data que entrou */}
-                <p className="text-sm text-gray-500">{testimonial.joinDate}</p>
+                <p className="text-[10px] md:text-sm text-gray-500">{testimonial.joinDate}</p>
 
                 {/* Feedback */}
-                <p className="text-gray-500 tracking-tight">{testimonial.feedback}</p>
+                <p className="text-[11px] md:text-base text-gray-500 tracking-tight leading-relaxed">{testimonial.feedback}</p>
 
                 {/* Estrelas */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 md:gap-1">
                   {[...Array(5)].map((_, i) => (
                     <svg
                       key={i}
-                      width="20"
-                      height="20"
+                      width="14"
+                      height="14"
+                      className="md:w-5 md:h-5"
                       viewBox="0 0 24 24"
                       fill={i < testimonial.rating ? "#FFD700" : "#E5E7EB"}
                       xmlns="http://www.w3.org/2000/svg"
