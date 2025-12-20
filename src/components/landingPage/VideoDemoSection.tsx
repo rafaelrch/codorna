@@ -117,15 +117,15 @@ const VideoDemoSection = () => {
           </div>
 
           {/* Card à Direita */}
-          <div className="relative rounded-3xl overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.15)] max-w-sm mx-auto lg:max-w-md">
-            <div className="relative w-full aspect-[9/16] bg-gray-200/10  border border-gray-300 rounded-3xl overflow-hidden p-4">
+          <div className="relative rounded-[40px] overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.15)] max-w-sm mx-auto lg:max-w-md">
+            <div className="relative w-full aspect-[9/16] bg-gray-200/10  rounded-3xl overflow-hidden p-4">
               <video 
                 autoPlay 
                 loop 
                 muted 
                 playsInline
                 preload="auto"
-                className="w-full h-full object-cover rounded-xl"
+                className="w-full h-full object-cover rounded-[25px]"
               >
                 <source src="/testeTela2.mp4" type="video/mp4" />
                 Seu navegador não suporta vídeos.
