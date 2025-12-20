@@ -35,34 +35,9 @@ const FAQ = () => {
         'Sim! O Codorna permite que você crie metas financeiras personalizadas, como economizar para uma viagem, pagar dívidas ou criar uma reserva de emergência. O sistema acompanha seu progresso automaticamente e envia atualizações regulares pelo WhatsApp sobre quanto falta para alcançar cada meta.',
     },
     {
-      question: 'O Codorna funciona offline?',
-      answer:
-        'O registro de transações pelo WhatsApp funciona normalmente mesmo quando você está offline. As mensagens são armazenadas e processadas assim que a conexão for restaurada. No entanto, para visualizar o dashboard e relatórios, é necessária conexão com a internet.',
-    },
-    {
-      question: 'Posso exportar meus dados financeiros?',
-      answer:
-        'Sim! Você pode exportar todos os seus dados financeiros a qualquer momento em formatos como CSV ou Excel. Isso garante total controle sobre suas informações e permite que você faça análises personalizadas usando outras ferramentas se desejar.',
-    },
-    {
-      question: 'Existe limite de transações que posso registrar?',
-      answer:
-        'Nos planos básicos há limites de transações mensais, mas nossos planos premium oferecem transações ilimitadas. Mesmo no plano gratuito, você pode registrar um número suficiente de transações para gerenciar suas finanças pessoais. Consulte nossa página de preços para ver os detalhes de cada plano.',
-    },
-    {
       question: 'Como funciona o período de teste grátis?',
       answer:
-        'Oferecemos um período de teste gratuito para que você possa experimentar todas as funcionalidades do Codorna sem compromisso. Durante o teste, você tem acesso completo a todos os recursos premium. Não é necessário cartão de crédito para começar o teste.',
-    },
-    {
-      question: 'O Codorna funciona para múltiplos usuários ou famílias?',
-      answer:
-        'Sim! Nossos planos familiares permitem que múltiplos membros da família compartilhem o mesmo perfil financeiro. Cada pessoa pode ter seu próprio acesso via WhatsApp e todas as transações são consolidadas em um único dashboard para uma visão completa das finanças da família.',
-    },
-    {
-      question: 'Posso usar o Codorna em vários dispositivos?',
-      answer:
-        'Sim! O Codorna é totalmente multiplataforma. Você pode acessar seu dashboard pelo computador, tablet ou smartphone. Como usamos o WhatsApp para registro de transações, você pode enviar despesas e receitas de qualquer dispositivo onde tenha o WhatsApp instalado.',
+        'Oferecemos um período de teste de 7 dias gratuitos para que você possa experimentar todas as funcionalidades do Codorna sem compromisso. Durante o teste, você tem acesso completo a todos os recursos premium. Não é necessário cartão de crédito para começar o teste.',
     },
   ];
 
@@ -151,7 +126,7 @@ const FAQ = () => {
                       style={{
                         fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
                         fontWeight: 400,
-                        fontSize: '23px',
+                        fontSize: '20px',
                         letterSpacing: '-0.6px',
                         lineHeight: '35px'
                       }}

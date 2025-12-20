@@ -9,7 +9,7 @@ const VideoDemoSection = () => {
           {/* Texto à Esquerda */}
           <div className="space-y-6">
             <h2 
-              className="text-4xl md:text-6xl lg:text-6xl font-medium tracking-tight"
+              className="text-5xl md:text-6xl lg:text-6xl font-medium tracking-tight"
               style={{
                 fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
                 fontWeight: 400,
@@ -127,7 +127,7 @@ const VideoDemoSection = () => {
                 preload="auto"
                 className="w-full h-full object-cover rounded-xl"
               >
-                <source src="/testeTela.mp4" type="video/mp4" />
+                <source src="/testeTela2.mp4" type="video/mp4" />
                 Seu navegador não suporta vídeos.
               </video>
             </div>
@@ -156,7 +156,7 @@ const VideoDemoSection = () => {
           {/* Texto à Direita */}
           <div className="space-y-6 lg:order-2 order-1">
             <h2 
-              className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight"
+              className="text-5xl md:text-5xl lg:text-6xl font-medium tracking-tight"
               style={{
                 fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
                 fontWeight: 400,

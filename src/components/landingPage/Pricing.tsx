@@ -69,9 +69,9 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
           WebkitMaskImage: 'radial-gradient(circle at 75% 50%, black 20%, transparent 40%)'
         }}
       />
-      <div className="max-w-5xl mx-auto space-y-48 relative z-10">
+      <div className="max-w-5xl mx-auto md:space-y-48 space-y-10 relative z-10">
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-7xl font-medium tracking-tighter text-gray-900">
+          <h2 className="text-5xl md:text-7xl font-medium tracking-tighter text-gray-900">
             Escolha seu <span className="text-[#208251]">plano</span>
           </h2>
         </div>
