@@ -130,6 +130,34 @@ class GoalService {
       throw new Error('User not authenticated')
     }
 
+    // Primeiro, buscar o nome da meta para identificar os registros relacionados
+    const { data: goal, error: fetchError } = await supabase
+      .from('metas')
+      .select('nomeMeta')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError) {
+      throw new Error('Failed to fetch goal')
+    }
+
+    // Excluir todos os registros financeiros relacionados (aportes e resgates)
+    const descricaoMeta = `Meta: ${goal.nomeMeta}`
+    
+    const { error: deleteRecordsError } = await supabase
+      .from('financeiro_registros')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('descricao', descricaoMeta)
+      .in('categoria', ['Aporte de meta', 'Resgate de meta'])
+
+    // Log do erro mas continua com a exclusão da meta mesmo se falhar
+    if (deleteRecordsError) {
+      console.error('Erro ao excluir registros financeiros relacionados:', deleteRecordsError)
+    }
+
+    // Excluir a meta
     const { error } = await supabase
       .from('metas')
       .delete()
@@ -171,9 +199,10 @@ class GoalService {
 
     // Registrar transação de aporte no histórico
     try {
-      await this.recordGoalTransaction(user, amountToAdd, goal.nomeMeta, 'saida')
+      await this.recordGoalTransaction(user, amountToAdd, goal.nomeMeta, 'saida', 'aporte', 'Aporte de meta')
     } catch (error) {
       // Se falhar ao registrar transação, ainda atualiza a meta mas loga o erro
+      console.error('Erro ao registrar transação de aporte:', error)
     }
 
     return this.updateGoal(id, { valor_atual: newAmount })
@@ -205,36 +234,44 @@ class GoalService {
     // Registrar transação de resgate no histórico
     if (amountToRemove > 0) {
       try {
-        await this.recordGoalTransaction(user, amountToRemove, goal.nomeMeta, 'entrada')
+        await this.recordGoalTransaction(user, amountToRemove, goal.nomeMeta, 'entrada', 'resgate', 'Resgate de meta')
       } catch (error) {
         // Se falhar ao registrar transação, ainda atualiza a meta mas loga o erro
+        console.error('Erro ao registrar transação de resgate:', error)
       }
     }
 
     return this.updateGoal(id, { valor_atual: newAmount })
   }
 
-  private async recordGoalTransaction(user: SupabaseUser, amount: number, goalName: string, tipo: 'saida' | 'entrada') {
+  private async recordGoalTransaction(
+    user: SupabaseUser, 
+    amount: number, 
+    goalName: string, 
+    tipo: 'saida' | 'entrada',
+    metodo: string,
+    categoria: string
+  ) {
     if (!user.email) {
       throw new Error('Usuário sem e-mail associado')
     }
 
     let userPhone = ''
     const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('phone')
+      .from('users_total')
+      .select('telefone')
       .eq('id', user.id)
       .single()
 
     if (!userError && userData) {
-      userPhone = userData.phone || ''
+      userPhone = userData.telefone || ''
     } else {
       userPhone = user.user_metadata?.phone || user.user_metadata?.telefone || ''
     }
 
     const now = new Date().toISOString()
-    // Usar apenas o nome da meta na descrição para facilitar a busca no histórico
-    const descricao = goalName
+    // Formatar descrição como "Meta: {nome da meta}"
+    const descricao = `Meta: ${goalName}`
 
     const { error } = await supabase
       .from('financeiro_registros')
@@ -242,12 +279,13 @@ class GoalService {
         data_hora: now,
         responsavel: userPhone,
         user_id: user.id,
-        categoria: 'Metas',
-        tipo,
+        categoria: categoria,
+        tipo: tipo,
         valor: amount,
-        descricao,
+        descricao: descricao,
         criado_em: now,
-        email: user.email
+        email: user.email,
+        metodo: metodo
       })
 
     if (error) {

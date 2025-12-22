@@ -68,10 +68,18 @@ const chartConfig = {
     label: "Pix",
     color: "hsl(45.4, 93.4%, 47.5%)", // Amarelo #FBBF24
   },
+  aporte: {
+    label: "Aporte",
+    color: "hsl(142.1, 76.2%, 36.3%)", // Verde #208251
+  },
+  resgate: {
+    label: "Resgate",
+    color: "hsl(0, 84.2%, 60.2%)", // Vermelho #EF4444
+  },
 } satisfies ChartConfig
 
 export function PaymentMethodAreaChart({ startDate, endDate }: PaymentMethodAreaChartProps) {
-  const [chartData, setChartData] = useState<Array<{ date: string; Crédito: number; Débito: number; Pix: number }>>([])
+  const [chartData, setChartData] = useState<Array<{ date: string; Crédito: number; Débito: number; Pix: number; aporte: number; resgate: number }>>([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
 
@@ -80,15 +88,28 @@ export function PaymentMethodAreaChart({ startDate, endDate }: PaymentMethodArea
       try {
         setLoading(true)
         
-        // Carregar transações de saída
-        const transactions = await transactionService.getTransactions({
-          startDate,
-          endDate,
-          type: 'saida'
-        })
+        // Carregar transações de saída e entrada (para incluir resgates)
+        const [saidaTransactions, entradaTransactions] = await Promise.all([
+          transactionService.getTransactions({
+            startDate,
+            endDate,
+            type: 'saida'
+          }),
+          transactionService.getTransactions({
+            startDate,
+            endDate,
+            type: 'entrada'
+          })
+        ])
+        
+        // Combinar transações, mas apenas incluir resgates das entradas
+        const transactions = [
+          ...saidaTransactions,
+          ...entradaTransactions.filter(t => t.metodo === 'resgate')
+        ]
 
         // Agrupar por data e método de pagamento
-        const groupedByDate: Record<string, { Crédito: number; Débito: number; Pix: number; dateObj: Date }> = {}
+        const groupedByDate: Record<string, { Crédito: number; Débito: number; Pix: number; aporte: number; resgate: number; dateObj: Date }> = {}
 
         transactions.forEach((transaction) => {
           // Extrair a data diretamente do timestamp sem conversão de timezone
@@ -100,11 +121,11 @@ export function PaymentMethodAreaChart({ startDate, endDate }: PaymentMethodArea
           const dateObj = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
           
           if (!groupedByDate[dateKey]) {
-            groupedByDate[dateKey] = { Crédito: 0, Débito: 0, Pix: 0, dateObj }
+            groupedByDate[dateKey] = { Crédito: 0, Débito: 0, Pix: 0, aporte: 0, resgate: 0, dateObj }
           }
 
           const method = transaction.metodo || 'Débito'
-          if (method === 'Crédito' || method === 'Débito' || method === 'Pix') {
+          if (method === 'Crédito' || method === 'Débito' || method === 'Pix' || method === 'aporte' || method === 'resgate') {
             groupedByDate[dateKey][method] += Number(transaction.valor)
           }
         })
@@ -125,6 +146,8 @@ export function PaymentMethodAreaChart({ startDate, endDate }: PaymentMethodArea
             Crédito: values.Crédito,
             Débito: values.Débito,
             Pix: values.Pix,
+            aporte: values.aporte,
+            resgate: values.resgate,
             dateObj: values.dateObj
           }))
           .sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime())
@@ -230,6 +253,20 @@ export function PaymentMethodAreaChart({ startDate, endDate }: PaymentMethodArea
               fillOpacity={0.2}
               stroke="#FBBF24"
             />
+            <Area
+              dataKey="aporte"
+              type="linear"
+              fill="#208251"
+              fillOpacity={0.2}
+              stroke="#208251"
+            />
+            <Area
+              dataKey="resgate"
+              type="linear"
+              fill="#EF4444"
+              fillOpacity={0.2}
+              stroke="#EF4444"
+            />
           </AreaChart>
         </ChartContainer>
       </CardContent>
@@ -246,6 +283,14 @@ export function PaymentMethodAreaChart({ startDate, endDate }: PaymentMethodArea
         <div className="flex items-center gap-1.5 sm:gap-2">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#FBBF24' }} />
           <span className="text-xs sm:text-sm text-muted-foreground">Pix</span>
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#208251' }} />
+          <span className="text-xs sm:text-sm text-muted-foreground">Aporte</span>
+        </div>
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#EF4444' }} />
+          <span className="text-xs sm:text-sm text-muted-foreground">Resgate</span>
         </div>
       </div>
     </Card>

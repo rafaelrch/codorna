@@ -48,18 +48,19 @@ export default function Transactions() {
   const [startDatePicker, setStartDatePicker] = useState<Date | undefined>(undefined);
   const [endDatePicker, setEndDatePicker] = useState<Date | undefined>(undefined);
   const [formDate, setFormDate] = useState<Date | undefined>(new Date());
+  const [typeFilter, setTypeFilter] = useState<'entrada' | 'saida' | 'all'>('all');
   const { toast } = useToast();
 
   // Carregar transações do Supabase
   const loadTransactions = async () => {
     try {
       setLoading(true);
-      // Buscar transações com filtros de data (apenas se as datas estiverem preenchidas)
+      // Buscar transações com filtros de data e tipo
       const data = await transactionService.getTransactions({
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         category: '',
-        type: undefined,
+        type: typeFilter !== 'all' ? typeFilter : undefined,
       });
 
       setTransactions(data);
@@ -91,10 +92,10 @@ export default function Transactions() {
     loadCategories();
   }, []);
 
-  // Recarregar transações quando as datas mudarem
+  // Recarregar transações quando as datas ou o filtro de tipo mudarem
   useEffect(() => {
     loadTransactions();
-  }, [startDate, endDate]);
+  }, [startDate, endDate, typeFilter]);
 
   // Handler para quando o Dialog abrir/fechar
   const handleDialogOpenChange = (open: boolean) => {
@@ -249,12 +250,15 @@ export default function Transactions() {
   };
 
   // Verificar se há filtros ativos
-  const hasActiveFilters = startDate || endDate;
+  const hasActiveFilters = startDate || endDate || typeFilter !== 'all';
 
   // Função para limpar filtros
   const clearFilters = () => {
     setStartDate('');
     setEndDate('');
+    setStartDatePicker(undefined);
+    setEndDatePicker(undefined);
+    setTypeFilter('all');
   };
 
   return (
@@ -285,6 +289,22 @@ export default function Transactions() {
                 placeholder="Data final"
                 className="w-full sm:w-36"
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500 whitespace-nowrap text-xs sm:text-sm">Tipo:</span>
+              <Select
+                value={typeFilter}
+                onValueChange={(value: 'entrada' | 'saida' | 'all') => setTypeFilter(value)}
+              >
+                <SelectTrigger className="w-full sm:w-36">
+                  <SelectValue placeholder="Todos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="entrada">Entrada</SelectItem>
+                  <SelectItem value="saida">Saída</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           {hasActiveFilters && (

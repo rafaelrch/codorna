@@ -10,7 +10,6 @@ import Dashboard from "./pages/Dashboard";
 import Transactions from "./pages/Transactions";
 import Goals from "./pages/Goals";
 import Account from "./pages/Account";
-import History from "./pages/History";
 import IA from "./pages/IA";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -58,11 +57,6 @@ const App = () => (
             <Route path="/account" element={
               <ProtectedRoute>
                 <Layout><Account /></Layout>
-              </ProtectedRoute>
-            } />
-            <Route path="/history" element={
-              <ProtectedRoute>
-                <Layout><History /></Layout>
               </ProtectedRoute>
             } />
             <Route path="/ia" element={

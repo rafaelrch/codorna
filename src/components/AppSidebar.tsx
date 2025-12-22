@@ -4,14 +4,12 @@ import {
   ChartBarSquareIcon,
   CreditCardIcon,
   FlagIcon,
-  ClockIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChartBarSquareIcon as ChartBarSquareIconSolid,
   CreditCardIcon as CreditCardIconSolid,
   FlagIcon as FlagIconSolid,
-  ClockIcon as ClockIconSolid,
   Cog6ToothIcon as Cog6ToothIconSolid,
 } from "@heroicons/react/24/solid";
 import { BotMessageSquare, Sparkles } from "lucide-react";
@@ -93,12 +91,6 @@ const navigation: NavigationItem[] = [
     href: "/goals",
     icon: FlagIcon,
     activeIcon: FlagIconSolid,
-  },
-  {
-    name: "Histórico",
-    href: "/history",
-    icon: ClockIcon,
-    activeIcon: ClockIconSolid,
   },
   {
     name: "IA",
