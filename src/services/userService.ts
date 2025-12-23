@@ -278,10 +278,16 @@ class UserService {
   }
 
   /**
-   * Nova verificação de acesso considerando:
-   * - Tabela users_trial: checa trial_end_at (formato dd/mm/aaaa) e expiração.
-   * - Tabela usuario_compra: checa status (APPROVED libera, outros redirecionam para renovação).
-   * - Tabela users_total: retorna o id para ser usado na plataforma.
+   * Verificação de acesso seguindo a lógica:
+   * 1. Verificar na tabela users_total se o usuário é PRO ou trial
+   * 2. Se for PRO:
+   *    - Verificar na tabela usuario_compra se o status é "APPROVED"
+   *    - Se APPROVED: liberar acesso
+   *    - Se "DELAYED": redirecionar para /subscription (assinatura pendente)
+   * 3. Se for trial:
+   *    - Verificar na tabela users_trial se o trial_end_at ultrapassou a data atual
+   *    - Se ultrapassou: redirecionar para /trial-expired
+   *    - Se não ultrapassou: liberar acesso
    */
   async evaluateAccessStatus(): Promise<{
     redirectTo: string | null
@@ -304,40 +310,8 @@ class UserService {
       }
     }
 
-    const metadataIsPro =
-      user.user_metadata?.subscription_type === 'pro' ||
-      user.user_metadata?.is_pro === true
-
     const normalizeStatus = (status: unknown) =>
       typeof status === 'string' ? status.trim().toUpperCase() : ''
-
-    const isApprovedPurchaseStatus = (status: unknown) => {
-      const s = normalizeStatus(status)
-      // Aceitar variações comuns (case/whitespace) e possíveis status equivalentes
-      return (
-        s === 'APPROVED' ||
-        s === 'APROVADO' ||
-        s === 'PAID' ||
-        s === 'ACTIVE' ||
-        s.startsWith('APPROV') // APPROVED/APROVADO/etc
-      )
-    }
-
-    const isBlockedPurchaseStatus = (status: unknown) => {
-      const s = normalizeStatus(status)
-      return (
-        s === 'CANCELLED' ||
-        s === 'CANCELED' ||
-        s === 'CANCELADO' ||
-        s === 'REFUNDED' ||
-        s === 'REEMBOLSADO' ||
-        s === 'CHARGEDBACK' ||
-        s === 'REJECTED' ||
-        s === 'RECUSADO' ||
-        s === 'EXPIRED' ||
-        s === 'EXPIRADO'
-      )
-    }
 
     // Buscar id na users_total para uso na aplicação
     let userTotalId: string | undefined
@@ -355,69 +329,99 @@ class UserService {
       // Erro silencioso
     }
 
-    // Verificar compra aprovada
+    // Determinar se o usuário é PRO ou trial
+    // Prioridade: verificar primeiro se existe em usuario_compra (PRO)
+    let userPlan: 'pro' | 'trial' | null = null
+
+    // Verificar se existe em usuario_compra (PRO)
     try {
-      const { data: compraData, error: compraError } = await supabase
+      const { data: compraData } = await supabase
         .from('usuario_compra')
-        .select('status')
+        .select('id')
         .eq('auth_id', user.id)
         .maybeSingle()
-
-      // Se não houver erro e houver dados
-      if (!compraError && compraData) {
-        if (isApprovedPurchaseStatus(compraData.status)) {
-          debugAccess('allowed: usuario_compra approved', { userId: user.id, status: compraData.status })
-          return { redirectTo: null, userTotalId }
-        }
-
-        // Se a compra existe e está explicitamente bloqueada, redirecionar
-        if (isBlockedPurchaseStatus(compraData.status)) {
-          debugAccess('blocked: usuario_compra status blocked', { userId: user.id, status: compraData.status })
-          return { redirectTo: '/trial-expired', userTotalId }
-        }
-        // Caso a compra exista mas esteja pendente/indefinida, não bloquear aqui:
-        // segue para outras fontes de PRO (metadata) e trial.
-        debugAccess('purchase present but not decisive', { userId: user.id, status: compraData.status })
-      }
-    } catch (error: any) {
-      // Erro silencioso - usuário pode não ter registro na tabela
-    }
-
-    // Outras fontes de PRO (não dependem de usuario_compra)
-    if (metadataIsPro) {
-      debugAccess('allowed: metadata pro', { userId: user.id })
-      return { redirectTo: null, userTotalId }
-    }
-
-    // Verificar trial
-    try {
-      const { data: trialData } = await supabase
-        .from('users_trial')
-        .select('trial_end_at')
-        .eq('id', user.id)
-        .maybeSingle()
-
-      if (trialData?.trial_end_at) {
-        const trialEnd = new Date(trialData.trial_end_at)
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-        const trialEndFormatted = trialEnd.toLocaleDateString('pt-BR')
-        const isExpired = trialEnd < today
-        
-        if (isExpired) {
-          debugAccess('blocked: trial expired', { userId: user.id, trial_end_at: trialData.trial_end_at })
-          return { redirectTo: '/trial-expired', userTotalId, trialEndFormatted }
-        } else {
-          debugAccess('allowed: trial active', { userId: user.id, trial_end_at: trialData.trial_end_at })
-          return { redirectTo: null, userTotalId, trialEndFormatted }
-        }
+      
+      if (compraData) {
+        userPlan = 'pro'
       }
     } catch (error: any) {
       // Erro silencioso
     }
 
-    // Caso não esteja em nenhuma tabela específica, permitir acesso padrão
-    debugAccess('allowed: default fallback', { userId: user.id })
+    // Se não encontrou em usuario_compra, verificar se existe em users_trial (trial)
+    if (!userPlan) {
+      try {
+        const { data: trialData } = await supabase
+          .from('users_trial')
+          .select('id')
+          .eq('id', user.id)
+          .maybeSingle()
+        
+        if (trialData) {
+          userPlan = 'trial'
+        }
+      } catch (error: any) {
+        // Erro silencioso
+      }
+    }
+
+    // Se for PRO, verificar status na tabela usuario_compra
+    if (userPlan === 'pro') {
+      try {
+        const { data: compraData, error: compraError } = await supabase
+          .from('usuario_compra')
+          .select('status')
+          .eq('auth_id', user.id)
+          .maybeSingle()
+
+        if (!compraError && compraData) {
+          const status = normalizeStatus(compraData.status)
+          
+          if (status === 'APPROVED') {
+            debugAccess('allowed: PRO user with APPROVED status', { userId: user.id, status: compraData.status })
+            return { redirectTo: null, userTotalId }
+          }
+          
+          if (status === 'DELAYED') {
+            debugAccess('blocked: PRO user with DELAYED status', { userId: user.id, status: compraData.status })
+            return { redirectTo: '/subscription-pending', userTotalId }
+          }
+        }
+      } catch (error: any) {
+        // Erro silencioso
+      }
+    }
+
+    // Se for trial, verificar se o trial expirou
+    if (userPlan === 'trial') {
+      try {
+        const { data: trialData } = await supabase
+          .from('users_trial')
+          .select('trial_end_at')
+          .eq('id', user.id)
+          .maybeSingle()
+
+        if (trialData?.trial_end_at) {
+          const trialEnd = new Date(trialData.trial_end_at)
+          const now = new Date()
+          const trialEndFormatted = trialEnd.toLocaleDateString('pt-BR')
+          const isExpired = trialEnd < now
+          
+          if (isExpired) {
+            debugAccess('blocked: trial expired', { userId: user.id, trial_end_at: trialData.trial_end_at })
+            return { redirectTo: '/trial-expired', userTotalId, trialEndFormatted }
+          } else {
+            debugAccess('allowed: trial active', { userId: user.id, trial_end_at: trialData.trial_end_at })
+            return { redirectTo: null, userTotalId, trialEndFormatted }
+          }
+        }
+      } catch (error: any) {
+        // Erro silencioso
+      }
+    }
+
+    // Se não conseguiu determinar o plano ou não encontrou dados, permitir acesso padrão
+    debugAccess('allowed: default fallback', { userId: user.id, userPlan })
     return { redirectTo: null, userTotalId }
   }
 }

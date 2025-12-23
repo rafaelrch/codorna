@@ -11,11 +11,14 @@ import Transactions from "./pages/Transactions";
 import Goals from "./pages/Goals";
 import Account from "./pages/Account";
 import IA from "./pages/IA";
+import Subscription from "./pages/Subscription";
+import Support from "./pages/Support";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import EmailConfirm from "./pages/EmailConfirm";
 import TrialExpired from "./pages/TrialExpired";
+import SubscriptionPending from "./pages/SubscriptionPending";
 import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
 
@@ -37,6 +40,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/email-confirm" element={<EmailConfirm />} />
             <Route path="/trial-expired" element={<TrialExpired />} />
+            <Route path="/subscription-pending" element={<SubscriptionPending />} />
             
             {/* Protected Routes */}
             <Route path="/dashboard" element={
@@ -62,6 +66,16 @@ const App = () => (
             <Route path="/ia" element={
               <ProtectedRoute>
                 <Layout><IA /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/subscription" element={
+              <ProtectedRoute>
+                <Layout><Subscription /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/support" element={
+              <ProtectedRoute>
+                <Layout><Support /></Layout>
               </ProtectedRoute>
             } />
             

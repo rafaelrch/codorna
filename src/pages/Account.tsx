@@ -118,8 +118,6 @@ export default function Account() {
 
   return (
     <div className="min-h-screen bg-[#EBEBEB] flex flex-col justify-center">
-      
-
       <Card className="max-w-full bg-[#F8F6F7] rounded-2xl mx-20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

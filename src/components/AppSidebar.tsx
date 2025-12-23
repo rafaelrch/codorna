@@ -5,12 +5,16 @@ import {
   CreditCardIcon,
   FlagIcon,
   Cog6ToothIcon,
+  RectangleStackIcon,
+  QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChartBarSquareIcon as ChartBarSquareIconSolid,
   CreditCardIcon as CreditCardIconSolid,
   FlagIcon as FlagIconSolid,
   Cog6ToothIcon as Cog6ToothIconSolid,
+  RectangleStackIcon as RectangleStackIconSolid,
+  QuestionMarkCircleIcon as QuestionMarkCircleIconSolid,
 } from "@heroicons/react/24/solid";
 import { BotMessageSquare, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -98,6 +102,18 @@ const navigation: NavigationItem[] = [
     icon: BotMessageSquare,
     activeIcon: BotMessageSquare,
     isLucide: true, // Flag para identificar ícones do Lucide
+  },
+  {
+    name: "Gerenciar Assinatura",
+    href: "/subscription",
+    icon: RectangleStackIcon,
+    activeIcon: RectangleStackIconSolid,
+  },
+  {
+    name: "Suporte",
+    href: "/support",
+    icon: QuestionMarkCircleIcon,
+    activeIcon: QuestionMarkCircleIconSolid,
   },
   {
     name: "Configurações",
@@ -408,3 +424,5 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
+
