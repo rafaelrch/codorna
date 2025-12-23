@@ -36,7 +36,7 @@ const Pricing = ({ onOpenWaitlist }: PricingProps) => {
       ],
       buttonText: "Assinar agora",
       isPro: true,
-      buttonLink: "https://pay.kirvano.com/75a61fc9-724d-42dc-9a97-b147a99e425e"
+      buttonLink: "https://pay.hotmart.com/J103502971C?off=winzekg6"
     }
   ];
   

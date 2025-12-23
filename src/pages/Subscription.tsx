@@ -126,11 +126,11 @@ export default function Subscription() {
   }, [user?.id, user?.user_metadata]);
 
   const handleSubscribe = () => {
-    window.open('https://pay.kirvano.com/75a61fc9-724d-42dc-9a97-b147a99e425e', '_blank');
+    window.open('https://pay.hotmart.com/J103502971C?off=winzekg6', '_blank');
   };
 
   const handleRenew = () => {
-    window.open('https://pay.kirvano.com/75a61fc9-724d-42dc-9a97-b147a99e425e', '_blank');
+    window.open('https://pay.hotmart.com/J103502971C?off=winzekg6', '_blank');
   };
 
   if (loading) {

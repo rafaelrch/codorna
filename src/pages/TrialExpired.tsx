@@ -58,7 +58,7 @@ export default function TrialExpired() {
               asChild
             >
               <a 
-                href="https://pay.kirvano.com/0601b095-cab7-4769-9ea6-0b498f96a32b" 
+                href="https://pay.hotmart.com/J103502971C?off=winzekg6" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
