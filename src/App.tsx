@@ -19,6 +19,9 @@ import ResetPassword from "./pages/ResetPassword";
 import EmailConfirm from "./pages/EmailConfirm";
 import TrialExpired from "./pages/TrialExpired";
 import SubscriptionPending from "./pages/SubscriptionPending";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import NotFound from "./pages/NotFound";
 import LandingPage from "./pages/LandingPage";
 
@@ -41,6 +44,14 @@ const App = () => (
             <Route path="/email-confirm" element={<EmailConfirm />} />
             <Route path="/trial-expired" element={<TrialExpired />} />
             <Route path="/subscription-pending" element={<SubscriptionPending />} />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={
+              <AdminProtectedRoute>
+                <AdminDashboard />
+              </AdminProtectedRoute>
+            } />
             
             {/* Protected Routes */}
             <Route path="/dashboard" element={
