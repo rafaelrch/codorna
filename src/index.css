@@ -1,0 +1,503 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === CODORNA DESIGN SYSTEM === */
+
+@layer base {
+  :root {
+    /* === CORES PRIMÁRIAS === */
+    --codorna-primary: #1a73e8;
+    --codorna-primary-hover: #1557b0;
+    --codorna-primary-light: #e8f0fe;
+    
+    /* === CORES DE FUNDO === */
+    --codorna-bg-primary: #ffffff;
+    --codorna-bg-secondary: #f8f9fa;
+    --codorna-bg-tertiary: #e8eaed;
+    --codorna-bg-sidebar: #f1f3f4;
+    --codorna-bg-card: #ffffff;
+    --codorna-bg-hover: #f1f3f4;
+    
+    /* === CORES DE TEXTO === */
+    --codorna-text-primary: #202124;
+    --codorna-text-secondary: #5f6368;
+    --codorna-text-tertiary: #9aa0a6;
+    --codorna-text-disabled: #dadce0;
+    --codorna-text-white: #ffffff;
+    
+    /* === CORES DE BORDA === */
+    --codorna-border-light: #dadce0;
+    --codorna-border-medium: #c4c7c5;
+    --codorna-border-dark: #9aa0a6;
+    
+    /* === CORES DE STATUS === */
+    --codorna-success: #34a853;
+    --codorna-success-bg: #e8f5e8;
+    --codorna-error: #ea4335;
+    --codorna-error-bg: #fce8e6;
+    --codorna-warning: #fbbc04;
+    --codorna-warning-bg: #fef7e0;
+    --codorna-info: #4285f4;
+    --codorna-info-bg: #e8f0fe;
+    
+    /* === CORES DO GRÁFICO (PIE CHART) === */
+    --codorna-chart-aluguel: #4285f4;      /* Azul - 32% */
+    --codorna-chart-gasolina: #8d6e63;     /* Marrom - 15% */
+    --codorna-chart-cartao: #fff176;       /* Amarelo - 15% */
+    --codorna-chart-ifood: #81c784;        /* Verde - 15% */
+    --codorna-chart-investimentos: #2e7d32; /* Verde escuro - 15% */
+    --codorna-chart-mercado: #7b1fa2;      /* Roxo - 15% */
+    --codorna-chart-casa: #e91e63;         /* Rosa - 15% */
+    
+    
+    /* === TIPOGRAFIA === */
+    --codorna-font-family: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    --codorna-font-mono: "SF Mono", Monaco, Inconsolata, "Roboto Mono", "Courier New", monospace;
+    
+    /* Tamanhos de fonte */
+    --codorna-font-xs: 0.75rem;    /* 12px */
+    --codorna-font-sm: 0.875rem;   /* 14px */
+    --codorna-font-base: 1rem;     /* 16px */
+    --codorna-font-lg: 1.125rem;   /* 18px */
+    --codorna-font-xl: 1.25rem;    /* 20px */
+    --codorna-font-2xl: 1.5rem;    /* 24px */
+    --codorna-font-3xl: 1.875rem;  /* 30px */
+    --codorna-font-4xl: 2.25rem;   /* 36px */
+    
+    /* Pesos da fonte */
+    --codorna-font-normal: 400;
+    --codorna-font-medium: 500;
+    --codorna-font-semibold: 600;
+    --codorna-font-bold: 700;
+    
+    /* Altura da linha */
+    --codorna-leading-tight: 1.25;
+    --codorna-leading-normal: 1.5;
+    --codorna-leading-relaxed: 1.625;
+    
+    /* === ESPAÇAMENTO === */
+    --codorna-space-1: 0.25rem;    /* 4px */
+    --codorna-space-2: 0.5rem;     /* 8px */
+    --codorna-space-3: 0.75rem;    /* 12px */
+    --codorna-space-4: 1rem;       /* 16px */
+    --codorna-space-5: 1.25rem;    /* 20px */
+    --codorna-space-6: 1.5rem;     /* 24px */
+    --codorna-space-8: 2rem;       /* 32px */
+    --codorna-space-10: 2.5rem;    /* 40px */
+    --codorna-space-12: 3rem;      /* 48px */
+    --codorna-space-16: 4rem;      /* 64px */
+    --codorna-space-20: 5rem;      /* 80px */
+    
+    /* === BORDAS === */
+    --codorna-radius-none: 0;
+    --codorna-radius-sm: 0.125rem;  /* 2px */
+    --codorna-radius-base: 0.25rem; /* 4px */
+    --codorna-radius-md: 0.375rem;  /* 6px */
+    --codorna-radius-lg: 0.5rem;    /* 8px */
+    --codorna-radius-xl: 0.75rem;   /* 12px */
+    --codorna-radius-2xl: 1rem;     /* 16px */
+    --codorna-radius-full: 9999px;
+    
+    /* Larguras de borda */
+    --codorna-border-width: 1px;
+    --codorna-border-width-2: 2px;
+    --codorna-border-width-4: 4px;
+    
+    /* === LAYOUT === */
+    --codorna-sidebar-width: 240px;
+    --codorna-header-height: 64px;
+    --codorna-container-max-width: 1200px;
+    
+    /* === TRANSIÇÕES === */
+    --codorna-transition-fast: 150ms ease-in-out;
+    --codorna-transition-normal: 250ms ease-in-out;
+    --codorna-transition-slow: 350ms ease-in-out;
+    
+    /* === Z-INDEX === */
+    --codorna-z-dropdown: 1000;
+    --codorna-z-sticky: 1020;
+    --codorna-z-fixed: 1030;
+    --codorna-z-modal: 1040;
+    --codorna-z-popover: 1050;
+    --codorna-z-tooltip: 1060;
+    
+    /* === BREAKPOINTS (para uso em container queries) === */
+    --codorna-bp-sm: 640px;
+    --codorna-bp-md: 768px;
+    --codorna-bp-lg: 1024px;
+    --codorna-bp-xl: 1280px;
+    --codorna-bp-2xl: 1536px;
+
+    /* === MAPEAMENTO PARA TAILWIND/SHADCN === */
+    /* Cores de fundo */
+    --background: 0 0% 100%; /* #ffffff */
+    --foreground: 210 11% 13%; /* #202124 */
+
+    --card: 0 0% 100%; /* #ffffff */
+    --card-foreground: 210 11% 13%; /* #202124 */
+
+    --popover: 0 0% 100%; /* #ffffff */
+    --popover-foreground: 210 11% 13%; /* #202124 */
+
+    /* Cores primárias */
+    --primary: 0 0% 0%; /* #000000 */
+    --primary-foreground: 0 0% 100%; /* #ffffff */
+
+    --secondary: 210 17% 98%; /* #f8f9fa */
+    --secondary-foreground: 210 11% 13%; /* #202124 */
+
+    --muted: 210 17% 98%; /* #f8f9fa */
+    --muted-foreground: 215 16% 47%; /* #5f6368 */
+
+    --accent: 210 17% 98%; /* #f8f9fa */
+    --accent-foreground: 210 11% 13%; /* #202124 */
+
+    /* Cores de status */
+    --success: 142 76% 36%; /* #34a853 */
+    --success-foreground: 0 0% 100%; /* #ffffff */
+    --success-light: 138 76% 97%; /* #e8f5e8 */
+
+    --destructive: 4 90% 58%; /* #ea4335 */
+    --destructive-foreground: 0 0% 100%; /* #ffffff */
+    --destructive-light: 4 90% 95%; /* #fce8e6 */
+
+    --warning: 45 93% 47%; /* #fbbc04 */
+    --warning-foreground: 0 0% 100%; /* #ffffff */
+    --warning-light: 45 93% 94%; /* #fef7e0 */
+
+    /* Cores de borda e input */
+    --border: 210 14% 89%; /* #dadce0 */
+    --input: 210 14% 89%; /* #dadce0 */
+    --ring: 0 0% 0%; /* #000000 */
+
+    /* Radius */
+    --radius: 0.5rem; /* 8px */
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%; /* #f1f3f4 */
+    --sidebar-foreground: 240 5.3% 26.1%; /* #202124 */
+    --sidebar-primary: 240 5.9% 10%; /* #202124 */
+    --sidebar-primary-foreground: 0 0% 98%; /* #ffffff */
+    --sidebar-accent: 240 4.8% 95.9%; /* #f8f9fa */
+    --sidebar-accent-foreground: 240 5.9% 10%; /* #202124 */
+    --sidebar-border: 220 13% 91%; /* #dadce0 */
+    --sidebar-ring: 217.2 91.2% 59.8%; /* #000000 */
+
+    /* Chart colors */
+    --chart-1: 0 0% 0%; /* #000000 - Aluguel */
+    --chart-2: 0 0% 20%; /* #333333 - Gasolina */
+    --chart-3: 0 0% 40%; /* #666666 - Cartão */
+    --chart-4: 0 0% 60%; /* #999999 - Ifood */
+    --chart-5: 0 0% 80%; /* #cccccc - Investimentos */
+    --chart-6: 0 0% 90%; /* #e6e6e6 - Mercado */
+    --chart-7: 0 0% 95%; /* #f2f2f2 - Casa */
+  }
+
+  .dark {
+    /* Manter o tema escuro para compatibilidade */
+    --background: 210 11% 13%;
+    --foreground: 0 0% 100%;
+    --card: 210 11% 13%;
+    --card-foreground: 0 0% 100%;
+    --popover: 210 11% 13%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 210 11% 13%;
+    --secondary: 210 11% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 11% 15%;
+    --muted-foreground: 215 16% 65%;
+    --accent: 210 11% 15%;
+    --accent-foreground: 0 0% 100%;
+    --border: 210 11% 20%;
+    --input: 210 11% 20%;
+    --ring: 0 0% 0%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+/* === CLASSES UTILITÁRIAS CODORNA === */
+@layer components {
+  .codorna-card {
+    background: var(--codorna-bg-card);
+    border-radius: var(--codorna-radius-lg);
+    padding: var(--codorna-space-6);
+  }
+
+  .codorna-button-primary {
+    background: var(--codorna-primary);
+    color: var(--codorna-text-white);
+    border: none;
+    border-radius: var(--codorna-radius-md);
+    padding: var(--codorna-space-3) var(--codorna-space-6);
+    font-weight: var(--codorna-font-medium);
+    transition: background-color var(--codorna-transition-fast);
+  }
+
+  .codorna-button-primary:hover {
+    background: var(--codorna-primary-hover);
+  }
+
+  .codorna-sidebar {
+    background: var(--codorna-bg-sidebar);
+    width: var(--codorna-sidebar-width);
+    border-right: var(--codorna-border-width) solid var(--codorna-border-light);
+  }
+
+  .codorna-text-primary {
+    color: var(--codorna-text-primary);
+  }
+
+  .codorna-text-secondary {
+    color: var(--codorna-text-secondary);
+  }
+
+  .codorna-bg-success {
+    background: var(--codorna-success-bg);
+    color: var(--codorna-success);
+  }
+
+  .codorna-bg-error {
+    background: var(--codorna-error-bg);
+    color: var(--codorna-error);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    /* box-shadow removido para permitir sombras manuais */
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+
+  /* Aplicar as cores do gráfico globalmente */
+  .recharts-pie-sector[data-key="Aluguel"] {
+    fill: #000000 !important;
+  }
+  
+  .recharts-pie-sector[data-key="Gasolina"] {
+    fill: #333333 !important;
+  }
+  
+  .recharts-pie-sector[data-key="Cartão"] {
+    fill: #666666 !important;
+  }
+  
+  .recharts-pie-sector[data-key="Ifood"] {
+    fill: #999999 !important;
+  }
+  
+  .recharts-pie-sector[data-key="Investimentos"] {
+    fill: #cccccc !important;
+  }
+  
+  .recharts-pie-sector[data-key="Mercado"] {
+    fill: #e6e6e6 !important;
+  }
+  
+  .recharts-pie-sector[data-key="Casa"] {
+    fill: #f2f2f2 !important;
+  }
+}
+
+/* === LANDING PAGE STYLES === */
+@layer components {
+  /* Cosmic theme colors */
+  .cosmic-gradient {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(10px);
+  }
+  
+  .cosmic-glow {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .cosmic-grid {
+    background-image: 
+      radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.15) 1px, transparent 0);
+    background-size: 20px 20px;
+  }
+  
+  /* Cosmic color variables */
+  .text-cosmic-accent {
+    color: #000000;
+  }
+  
+  .text-cosmic-muted {
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .bg-cosmic-darker {
+    background-color: #0a0a0a;
+  }
+  
+  .bg-cosmic-light {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .border-cosmic-light {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Waitlist popup blur effect */
+  .waitlist-blur {
+    filter: blur(4px);
+    transition: filter 0.3s ease-in-out;
+  }
+  
+  .waitlist-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 40;
+    transition: all 0.3s ease-in-out;
+  }
+
+  /* Animação para transações */
+  @keyframes transaction-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+      filter: blur(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  .animate-transaction-fade-in {
+    animation: transaction-fade-in 0.6s ease-out forwards;
+  }
+
+  /* Estilização customizada do scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background-color: #9ca3af;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
+  }
+
+  /* Animações para carrosséis alternados */
+  @keyframes scroll-forward {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
+  
+  @keyframes scroll-reverse {
+    0% {
+      transform: translateX(-33.333%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(33.333%);
+    }
+    50% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
+
+  .animate-scroll-forward {
+    animation: scroll-forward 12s linear infinite;
+  }
+
+  .animate-scroll-reverse {
+    animation: scroll-reverse 12s linear infinite;
+  }
+
+  .animate-scroll-left {
+    animation: scroll-left 24s linear infinite;
+  }
+
+  /* Animações para círculos flutuantes */
+  @keyframes float-1 {
+    0%, 100% {
+      transform: translate(-50%, -50%) translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(-50%, -50%) translate(30px, -20px) scale(1.1);
+    }
+    66% {
+      transform: translate(-50%, -50%) translate(-20px, 30px) scale(0.9);
+    }
+  }
+
+  @keyframes float-2 {
+    0%, 100% {
+      transform: translate(-50%, -50%) translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(-50%, -50%) translate(-25px, 25px) scale(0.95);
+    }
+    66% {
+      transform: translate(-50%, -50%) translate(25px, -25px) scale(1.05);
+    }
+  }
+
+  @keyframes float-3 {
+    0%, 100% {
+      transform: translate(-50%, -50%) translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(-50%, -50%) translate(20px, 20px) scale(1.05);
+    }
+    66% {
+      transform: translate(-50%, -50%) translate(-30px, -15px) scale(0.95);
+    }
+  }
+
+  .animate-float-1 {
+    animation: float-1 8s ease-in-out infinite;
+  }
+
+  .animate-float-2 {
+    animation: float-2 10s ease-in-out infinite;
+  }
+
+  .animate-float-3 {
+    animation: float-3 12s ease-in-out infinite;
+  }
+}
