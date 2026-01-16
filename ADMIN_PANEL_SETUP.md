@@ -85,3 +85,5 @@ O código agora mostra logs detalhados no console. Verifique:
 - Se a service role key está sendo usada
 
 
+
+

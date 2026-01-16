@@ -176,3 +176,5 @@ A `VITE_SUPABASE_SERVICE_ROLE_KEY` tem acesso total ao banco de dados.
    - Se funcionar localmente mas não em produção, o problema é a configuração na plataforma
 
 
+
+

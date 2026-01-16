@@ -80,3 +80,5 @@ Se os cards de usuários estão zerados mesmo tendo a `VITE_SUPABASE_SERVICE_ROL
    - Se funcionar localmente mas não em produção, o problema é a configuração no Vercel
 
 
+
+
