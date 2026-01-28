@@ -56,8 +56,8 @@ export default function Login() {
       title="Bem-vindo ao Codorna! 👋"
       subtitle=""
       description="Gerencie suas finanças de forma simples e eficiente."
-      backgroundImage="/tenis.jpg"
-      backgroundImageAlt="Tênis e aplicativo Codorna"
+      backgroundImage="/joaoLucas-3.png"
+      backgroundImageAlt="João Lucas e aplicativo Codorna"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
